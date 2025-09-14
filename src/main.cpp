@@ -1,4 +1,4 @@
-#include "chip8.hpp"
+#include "../include/chip8.hpp"
 
 int main() {
     // Load Chip8 ROM

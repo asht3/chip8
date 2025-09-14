@@ -1,2 +1,2 @@
-#include "chip8.hpp"
+#include "../include/chip8.hpp"
 

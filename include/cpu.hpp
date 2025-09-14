@@ -1,3 +1,6 @@
+#pragma once
+#include <cstdint>
+
 class CPU {
     private:
         uint8_t V[16];        // Registers V0 to VF

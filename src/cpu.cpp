@@ -1,6 +1,7 @@
-#include "cpu.hpp"
+#include "../include/cpu.hpp"
 #include <algorithm>
-#include <cstdint>
+// #include <cstdint>
+#include <stdexcept>
 
 CPU::CPU() {
     reset();
@@ -26,5 +27,20 @@ void CPU::OP_00E0(uint8_t* display) {
 }
 
 void CPU::OP_00EE() {
+    if (SP == 0) {
+        throw std::runtime_error("Stack underflow on RET");
+    }
     PC = stack[--SP];
+}
+
+void CPU::OP_1nnn(uint16_t opcode) {
+    PC = opcode & 0x0FFF;
+}
+
+void CPU::OP_2nnn(uint16_t opcode) {
+    if (SP >= 16) {
+        throw std::runtime_error("Stack overflow on CALL");
+    }
+    stack[SP++] = PC;
+    PC = opcode & 0x0FFF;
 }
