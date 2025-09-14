@@ -3,16 +3,17 @@ CXXFLAGS = -Wall -Wextra -Werror -g -Iinclude
 
 TARGET = chip8
 SRCS = src/chip8.cpp src/main.cpp src/cpu.cpp src/display.cpp src/input.cpp src/memory.cpp
-OBJS = $(SRCS:.cpp=.o)
+OBJS = $(patsubst src/%.cpp, obj/%.o, $(SRCS))
 
 $(TARGET): $(OBJS)
 	$(CC) $(CXXFLAGS) -o $(TARGET) $(OBJS)
 
-%.o: %.cpp
+obj/%.o: src/%.cpp
+	@mkdir -p obj
 	$(CC) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(TARGET) $(OBJS)
+	rm -f $(TARGET) obj/*.o
 
 fclean: clean
 	rm -f $(TARGET)
