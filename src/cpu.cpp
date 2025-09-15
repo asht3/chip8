@@ -16,8 +16,92 @@ void CPU::reset() {
     SP = 0;
 }
 
+void CPU::push_stack(uint16_t address) {
+    if (SP >= 16) {
+        throw std::runtime_error("Stack overflow on push");
+    }
+    stack[SP++] = address;
+}
+
+uint16_t CPU::pop_stack() {
+    if (SP == 0) {
+        throw std::runtime_error("Stack underflow on pop");
+    }
+    return stack[--SP];
+}
+
+// Fetch, decode, and execute opcode
+void CPU::execute_cycle(uint8_t* memory, uint8_t* display, bool* keys) {
+    uint16_t opcode = fetch_opcode(memory);
+    PC += 2; // Move to next instruction by default
+
+    switch (opcode & 0xF000) {
+        case 0x0000:
+            switch (opcode & 0x00FF) {
+                case 0x00E0: OP_00E0(display); break;
+                case 0x00EE: OP_00EE(); break;
+                default: throw std::runtime_error("Unknown opcode: " + std::to_string(opcode));
+            }
+            break;
+        case 0x1000: OP_1nnn(opcode); break;
+        case 0x2000: OP_2nnn(opcode); break;
+        case 0x3000: OP_3xkk(opcode); break;
+        case 0x4000: OP_4xkk(opcode); break;
+        case 0x5000: OP_5xy0(opcode); break;
+        case 0x6000: OP_6xkk(opcode); break;
+        case 0x7000: OP_7xkk(opcode); break;
+        case 0x8000:
+            switch (opcode & 0x000F) {
+                case 0x0000: OP_8xy0(opcode); break;
+                case 0x0001: OP_8xy1(opcode); break;
+                case 0x0002: OP_8xy2(opcode); break;
+                case 0x0003: OP_8xy3(opcode); break;
+                case 0x0004: OP_8xy4(opcode); break;
+                case 0x0005: OP_8xy5(opcode); break;
+                case 0x0006: OP_8xy6(opcode); break;
+                case 0x0007: OP_8xy7(opcode); break;
+                case 0x000E: OP_8xyE(opcode); break;
+                default: throw std::runtime_error("Unknown opcode: " + std::to_string(opcode));
+            }
+            break;
+        case 0x9000: OP_9xy0(opcode); break;
+        case 0xA000: OP_Annn(opcode); break;
+        case 0xB000: OP_Bnnn(opcode); break;
+        case 0xC000: OP_Cxkk(opcode); break;
+        case 0xD000: OP_Dxyn(memory, display, opcode); break;
+        case 0xE000:
+            switch (opcode & 0x00FF) {
+                case 0x009E: OP_Ex9E(opcode, keys); break;
+                case 0x00A1: OP_ExA1(opcode, keys); break;
+                default: throw std::runtime_error("Unknown opcode: " + std::to_string(opcode));
+            }
+            break;
+        case 0xF000:
+            switch (opcode & 0x00FF) {
+                case 0x0007: OP_Fx07(opcode); break;
+                case 0x000A: OP_Fx0A(opcode, keys); break;
+                case 0x0015: OP_Fx15(opcode); break;
+                case 0x0018: OP_Fx18(opcode); break;
+                case 0x001E: OP_Fx1E(opcode); break;
+                case 0x0029: OP_Fx29(opcode); break;
+                case 0x0033: OP_Fx33(opcode, memory); break;
+                case 0x0055: OP_Fx55(opcode, memory); break;
+                case 0x0065: OP_Fx65(opcode, memory); break;
+                default: throw std::runtime_error("Unknown opcode: " + std::to_string(opcode));
+            }
+            break;
+        default: throw std::runtime_error("Unknown opcode: " + std::to_string(opcode));
+    }
+}
+
+
 uint16_t CPU::fetch_opcode(uint8_t* memory) {
     return (memory[PC] << 8) | memory[PC + 1];
+}
+
+void CPU::update_timers() {
+    if (delay_timer > 0) --delay_timer;
+    if (sound_timer > 0) --sound_timer;
 }
 
 void CPU::OP_00E0(uint8_t* display) {
@@ -29,7 +113,7 @@ void CPU::OP_00EE() {
     if (SP == 0) {
         throw std::runtime_error("Stack underflow on RET");
     }
-    PC = stack[--SP];
+    PC = pop_stack();
 }
 
 void CPU::OP_1nnn(uint16_t opcode) {
@@ -40,7 +124,7 @@ void CPU::OP_2nnn(uint16_t opcode) {
     if (SP >= 16) {
         throw std::runtime_error("Stack overflow on CALL");
     }
-    stack[SP++] = PC;
+    push_stack(PC);
     PC = opcode & 0x0FFF;
 }
 
