@@ -12,7 +12,6 @@ class CPU {
         uint8_t SP;           // Stack pointer
 
         uint16_t fetch_opcode(uint8_t* memory);
-        void update_timers();
 
         // Opcode handlers
         void OP_00E0(uint8_t* display);                   // Clear screen
@@ -54,12 +53,13 @@ class CPU {
         CPU();
         void reset();
         void execute_cycle(uint8_t* memory, uint8_t* display, bool* keys);
+        void update_timers();
         // void set_delay_timer(uint8_t value);
         // uint8_t get_delay_timer() const;
         // void set_sound_timer(uint8_t value);
         // uint8_t get_sound_timer() const;
-        // uint16_t get_pc() const;
-        // void set_pc(uint16_t address);
+        uint16_t get_pc() const;
+        void set_pc(uint16_t address);
         // uint16_t get_I() const;
         // void set_I(uint16_t address);
         // uint8_t get_V(uint8_t index) const;

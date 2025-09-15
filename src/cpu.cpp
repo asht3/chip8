@@ -350,3 +350,11 @@ void CPU::OP_Fx65(uint16_t opcode, uint8_t* memory) {
     }
     I += Vx + 1;
 }
+
+uint16_t CPU::get_pc() const {
+    return PC;
+}
+
+void CPU::set_pc(uint16_t address) {
+    PC = address;
+}
