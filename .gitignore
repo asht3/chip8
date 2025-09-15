@@ -1,3 +1,6 @@
 # Object files & directory
 *.o
 obj/
+
+# Executables
+chip8
