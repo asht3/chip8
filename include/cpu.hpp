@@ -37,7 +37,7 @@ class CPU {
         void OP_Annn(uint16_t opcode);                    // Set I = nnn
         void OP_Bnnn(uint16_t opcode);                    // Jump to V0 + nnn
         void OP_Cxkk(uint16_t opcode);                    // Set Vx = random byte AND kk
-        void OP_Dxyn(uint8_t* memory, uint8_t* display);  // Draw sprite
+        void OP_Dxyn(uint8_t* memory, uint8_t* display, uint16_t opcode);  // Draw sprite
         void OP_Ex9E(uint16_t opcode, bool* keys);        // Skip if key pressed
         void OP_ExA1(uint16_t opcode, bool* keys);        // Skip if key not pressed
         void OP_Fx07(uint16_t opcode);                    // Set Vx = delay timer
