@@ -9,7 +9,7 @@ CPU::CPU() {
 void CPU::reset() {
     std::fill(std::begin(V), std::end(V), 0);
     I = 0;
-    PC = 0x200; // Start at memory location 0x200
+    PC = START_ADDRESS;
     delay_timer = 0;
     sound_timer = 0;
     std::fill(std::begin(stack), std::end(stack), 0);

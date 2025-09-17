@@ -4,9 +4,11 @@
 class Memory {
     private:
         uint8_t memory[4096]; // 4K memory
+        const unsigned int FONTSET_SIZE = 80;
 
     public:
         Memory();
+        void reset();
         uint8_t* get_memory();
         uint8_t read(uint16_t address) const;
         void write(uint16_t address, uint8_t value);

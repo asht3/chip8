@@ -6,6 +6,7 @@ class Input {
         bool keys[16];
     public:
         Input();
+        void reset();
         bool* get_keys();
         void set_key(uint8_t key, bool pressed);
         bool is_key_pressed(int key);

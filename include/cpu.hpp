@@ -50,6 +50,8 @@ class CPU {
         void OP_Fx65(uint16_t opcode, uint8_t* memory);   // Read registers V0 through Vx from memory
 
     public:
+        const unsigned int START_ADDRESS = 0x200;
+
         CPU();
         void reset();
         void execute_cycle(uint8_t* memory, uint8_t* display, bool* keys);

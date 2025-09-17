@@ -5,23 +5,25 @@
 #include "../include/input.hpp"
 
 Chip8::Chip8() {
-    cpu.reset();
-    // TODO: clear memory
-    display.clear();
-    // TODO: clear input
-    running = false;
-    // TODO: Load fontset into memory
-
+    reset();
 }
 
-// void Chip8::load_rom(const char* filename);
+void Chip8::reset() {
+    cpu.reset();
+    memory.reset();
+    display.clear();
+    input.reset();
+    running = false;
+}
+
 void Chip8::emulate_cycle() {
-    uint16_t pc = cpu.get_pc();
-    uint16_t opcode = memory.read(pc) << 8 | memory.read(pc + 1);
+    // uint16_t pc = cpu.get_pc();
+    // uint16_t opcode = memory.read(pc) << 8 | memory.read(pc + 1);
 
     cpu.execute_cycle(memory.get_memory(), display.get_pixels(), input.get_keys());
     cpu.update_timers();
 }
+
 // void Chip8::run();
 // void Chip8::stop();
 

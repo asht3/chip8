@@ -13,7 +13,7 @@ class Chip8 {
 
     public:
         Chip8();
-        void load_rom(const char* filename);
+        void reset();
         void emulate_cycle();
         void run();
         void stop();
