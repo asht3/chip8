@@ -1,5 +1,8 @@
 #pragma once
 #include <cstdint>
+#include "../include/memory.hpp"
+#include "../include/display.hpp"
+#include "../include/input.hpp"
 
 class CPU {
     private:
@@ -11,10 +14,10 @@ class CPU {
         uint16_t stack[16];   // Stack for subroutine calls
         uint8_t SP;           // Stack pointer
 
-        uint16_t fetch_opcode(uint8_t* memory);
+        uint16_t fetch_opcode(Memory& memory);
 
         // Opcode handlers
-        void OP_00E0(uint8_t* display);                   // Clear screen
+        void OP_00E0(Display& display);                   // Clear screen
         void OP_00EE();                                   // Return from subroutine
         void OP_1nnn(uint16_t opcode);                    // Jump to address
         void OP_2nnn(uint16_t opcode);                    // Call subroutine
@@ -36,25 +39,25 @@ class CPU {
         void OP_Annn(uint16_t opcode);                    // Set I = nnn
         void OP_Bnnn(uint16_t opcode);                    // Jump to V0 + nnn
         void OP_Cxkk(uint16_t opcode);                    // Set Vx = random byte AND kk
-        void OP_Dxyn(uint8_t* memory, uint8_t* display, uint16_t opcode);  // Draw sprite
-        void OP_Ex9E(uint16_t opcode, bool* keys);        // Skip if key pressed
-        void OP_ExA1(uint16_t opcode, bool* keys);        // Skip if key not pressed
+        void OP_Dxyn(Memory& memory, Display& display, uint16_t opcode);  // Draw sprite
+        void OP_Ex9E(uint16_t opcode, Input& keys);        // Skip if key pressed
+        void OP_ExA1(uint16_t opcode, Input& keys);        // Skip if key not pressed
         void OP_Fx07(uint16_t opcode);                    // Set Vx = delay timer
-        void OP_Fx0A(uint16_t opcode, bool* keys);        // Wait for key press
+        void OP_Fx0A(uint16_t opcode, Input& keys);        // Wait for key press
         void OP_Fx15(uint16_t opcode);                    // Set delay timer = Vx
         void OP_Fx18(uint16_t opcode);                    // Set sound timer = Vx
         void OP_Fx1E(uint16_t opcode);                    // Set I = I + Vx
         void OP_Fx29(uint16_t opcode);                    // Set I to sprite address for character in Vx
-        void OP_Fx33(uint16_t opcode, uint8_t* memory);   // Store BCD representation of Vx in memory
-        void OP_Fx55(uint16_t opcode, uint8_t* memory);   // Store registers V0 through Vx in memory
-        void OP_Fx65(uint16_t opcode, uint8_t* memory);   // Read registers V0 through Vx from memory
+        void OP_Fx33(uint16_t opcode, Memory& memory);   // Store BCD representation of Vx in memory
+        void OP_Fx55(uint16_t opcode, Memory& memory);   // Store registers V0 through Vx in memory
+        void OP_Fx65(uint16_t opcode, Memory& memory);   // Read registers V0 through Vx from memory
 
     public:
         const unsigned int START_ADDRESS = 0x200;
 
         CPU();
         void reset();
-        void execute_cycle(uint8_t* memory, uint8_t* display, bool* keys);
+        void execute_cycle(Memory& memory, Display& display, Input& keys);
         void update_timers();
         // void set_delay_timer(uint8_t value);
         // uint8_t get_delay_timer() const;

@@ -12,3 +12,10 @@ void Input::reset() {
 bool* Input::get_keys() {
     return keys;
 }
+
+bool Input::is_pressed(int key) {
+    if (key < 0 || key >= 16) {
+        return false;
+    }
+    return keys[key];
+}

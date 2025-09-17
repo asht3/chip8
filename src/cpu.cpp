@@ -31,7 +31,7 @@ uint16_t CPU::pop_stack() {
 }
 
 // Fetch, decode, and execute opcode
-void CPU::execute_cycle(uint8_t* memory, uint8_t* display, bool* keys) {
+void CPU::execute_cycle(Memory& memory, Display& display, Input& keys) {
     uint16_t opcode = fetch_opcode(memory);
     PC += 2; // Move to next instruction by default
 
@@ -95,8 +95,8 @@ void CPU::execute_cycle(uint8_t* memory, uint8_t* display, bool* keys) {
 }
 
 
-uint16_t CPU::fetch_opcode(uint8_t* memory) {
-    return (memory[PC] << 8) | memory[PC + 1];
+uint16_t CPU::fetch_opcode(Memory& memory) {
+    return (memory.read(PC) << 8) | memory.read(PC + 1);
 }
 
 void CPU::update_timers() {
@@ -104,9 +104,8 @@ void CPU::update_timers() {
     if (sound_timer > 0) --sound_timer;
 }
 
-void CPU::OP_00E0(uint8_t* display) {
-    // Clear the display by setting all pixels to 0
-    std::fill(display, display + 64 * 32, 0);
+void CPU::OP_00E0(Display& display) {
+    display.clear();
 }
 
 void CPU::OP_00EE() {
@@ -194,11 +193,8 @@ void CPU::OP_8xy4(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t Vy = (opcode & 0x00F0) >> 4;
     uint16_t sum = V[Vx] + V[Vy];
-    V[0xF] = (sum > 0xFF) ? 1 : 0;
-    V[Vx] = sum & 0xFF;
-    // Vx = V[Vx] + V[Vy];
-    // V[0xF] = (Vx > 0xFF) ? 1 : 0; // Set carry flag
-    // V[Vx] = Vx & 0xFF; // Keep only the lower 8 bits
+    V[0xF] = (sum > 0xFF) ? 1 : 0; // Set carry flag
+    V[Vx] = sum & 0xFF; // Keep only the lower 8 bits
 }
 
 void CPU::OP_8xy5(uint16_t opcode) {
@@ -251,41 +247,46 @@ void CPU::OP_Cxkk(uint16_t opcode) {
     V[Vx] = (rand() % 256) & kk;
 }
 
-void CPU::OP_Dxyn(uint8_t* memory, uint8_t* display, uint16_t opcode) {
+void CPU::OP_Dxyn(Memory& memory, Display& display, uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t Vy = (opcode & 0x00F0) >> 4;
     uint8_t height = opcode & 0x000F;
-    // Coordinates
+    
     uint8_t x = V[Vx] % 64;
     uint8_t y = V[Vy] % 32;
-    V[0xF] = 0;
+    V[0xF] = 0;  // Reset collision flag
 
     for (int row = 0; row < height; row++) {
-        uint8_t sprite_byte = memory[I + row];
+        uint8_t sprite_byte = memory.read(I + row);
+        
         for (int col = 0; col < 8; col++) {
-            if ((sprite_byte & (0x80 >> col)) != 0) { // Check if the current bit is set
-                int display_index = (x + col) % 64 + ((y + row) % 32) * 64;
-                if (display[display_index] == 1) {
-                    V[0xF] = 1; // Collision detected
+            if ((sprite_byte & (0x80 >> col)) != 0) {
+                uint8_t pixel_x = (x + col) % 64;
+                uint8_t pixel_y = (y + row) % 32;
+                
+                // Check if pixel is currently set
+                if (display.get_pixel(pixel_x, pixel_y)) {
+                    V[0xF] = 1;  // Collision detected
                 }
-                display[display_index] ^= 1; // XOR the pixel
+                
+                display.flip_pixel(pixel_x, pixel_y);
             }
         }
     }
 }
 
-void CPU::OP_Ex9E(uint16_t opcode, bool* keys) {
+void CPU::OP_Ex9E(uint16_t opcode, Input& keys) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     // Check if key is valid and pressed
-    if (V[Vx] < 16 && keys[V[Vx]]) {
+    if (V[Vx] < 16 && keys.is_pressed(V[Vx])) {
         PC += 2;
     }
 }
 
-void CPU::OP_ExA1(uint16_t opcode, bool* keys) {
+void CPU::OP_ExA1(uint16_t opcode, Input& keys) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     // Check if key is valid and not pressed
-    if (V[Vx] < 16 && !keys[V[Vx]]) {
+    if (V[Vx] < 16 && !keys.is_pressed(V[Vx])) {
         PC += 2;
     }
 }
@@ -295,10 +296,10 @@ void CPU::OP_Fx07(uint16_t opcode) {
     V[Vx] = delay_timer;
 }
 
-void CPU::OP_Fx0A(uint16_t opcode, bool* keys) {
+void CPU::OP_Fx0A(uint16_t opcode, Input& keys) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     for (uint8_t i = 0; i < 16; i++) {
-        if (keys[i]) {
+        if (keys.is_pressed(i)) {
             V[Vx] = i;
             return;
         }
@@ -328,25 +329,25 @@ void CPU::OP_Fx29(uint16_t opcode) {
     I = character * 5; // Each character is 5 bytes
 }
 
-void CPU::OP_Fx33(uint16_t opcode, uint8_t* memory) {
+void CPU::OP_Fx33(uint16_t opcode, Memory& memory) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
-    memory[I] = V[Vx] / 100;
-    memory[I + 1] = V[Vx] / 10 % 10;
-    memory[I + 2] = V[Vx] % 10;
+    memory.write(I, V[Vx] / 100);
+    memory.write(I + 1, (V[Vx] / 10) % 10);
+    memory.write(I + 2, V[Vx] % 10);
 }
 
-void CPU::OP_Fx55(uint16_t opcode, uint8_t* memory) {
+void CPU::OP_Fx55(uint16_t opcode, Memory& memory) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     for (uint8_t i = 0; i <= Vx; i++) {
-        memory[I + i] = V[i];
+        memory.write(I + i, V[i]);
     }
     I += Vx + 1;
 }
 
-void CPU::OP_Fx65(uint16_t opcode, uint8_t* memory) {
+void CPU::OP_Fx65(uint16_t opcode, Memory& memory) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     for (uint8_t i = 0; i <= Vx; i++) {
-        V[i] = memory[I + i];
+        V[i] = memory.read(I + i);
     }
     I += Vx + 1;
 }

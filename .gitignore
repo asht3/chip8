@@ -2,5 +2,8 @@
 *.o
 obj/
 
+# Other files
+old_ver/
+
 # Executables
 chip8

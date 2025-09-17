@@ -17,10 +17,7 @@ void Chip8::reset() {
 }
 
 void Chip8::emulate_cycle() {
-    // uint16_t pc = cpu.get_pc();
-    // uint16_t opcode = memory.read(pc) << 8 | memory.read(pc + 1);
-
-    cpu.execute_cycle(memory.get_memory(), display.get_pixels(), input.get_keys());
+    cpu.execute_cycle(memory, display, input);
     cpu.update_timers();
 }
 
