@@ -14,6 +14,24 @@ void Display::clear() {
 //     return pixels;
 // }
 
+bool Display::draw_sprite(uint8_t x, uint8_t y, uint8_t* sprite, uint8_t height) {
+    bool collision = false;
+    for (int row = 0; row < height; row++) {
+        uint8_t sprite_row = sprite[row];
+        for (int col = 0; col < 8; col++) {
+            if ((sprite_row & (0x80 >> col)) != 0) {  // Check if the bit is set
+                int px = (x + col) % 64;              // Wrap around horizontally
+                int py = (y + row) % 32;              // Wrap around vertically
+                if (xor_pixel(px, py)) {
+                    collision = true;                  // Collision detected
+                }
+            }
+        }
+    }
+    draw_flag = true;
+    return collision;
+}
+
 bool Display::get_pixel(uint8_t x, uint8_t y) {
     return pixels[x + y * 64];
 }
@@ -31,4 +49,12 @@ bool Display::xor_pixel(uint8_t x, uint8_t y) {
 
 void Display::flip_pixel(uint8_t x, uint8_t y) {
     pixels[x + y * 64] = !pixels[x + y * 64];
+}
+
+bool Display::needs_redraw() {
+    return draw_flag;
+}
+
+void Display::clear_redraw_flag() {
+    draw_flag = false;
 }

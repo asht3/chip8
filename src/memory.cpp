@@ -12,9 +12,9 @@ void Memory::reset() {
     load_fontset();
 }
 
-uint8_t* Memory::get_memory() {
-    return memory;
-}
+// uint8_t* Memory::get_memory() {
+//     return memory;
+// }
 
 uint8_t Memory::read(uint16_t address) const {
     if (address >= 4096) {

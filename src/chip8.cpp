@@ -22,7 +22,11 @@ void Chip8::emulate_cycle() {
 }
 
 // void Chip8::run();
+
 // void Chip8::stop();
 
 // Display& get_display();
-// bool Chip8::is_running();
+
+bool Chip8::is_running() {
+    return running;
+}

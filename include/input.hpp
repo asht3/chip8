@@ -7,7 +7,7 @@ class Input {
     public:
         Input();
         void reset();
-        bool* get_keys();
+        // bool* get_keys();
         void set_key(uint8_t key, bool pressed);
         bool is_pressed(int key);
         uint8_t wait_for_keypress();
