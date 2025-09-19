@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <string>
 
 class Memory {
     private:
@@ -9,9 +10,11 @@ class Memory {
     public:
         Memory();
         void reset();
-        // uint8_t* get_memory();
         uint8_t read(uint16_t address) const;
         void write(uint16_t address, uint8_t value);
-        void load_rom(const char* filename, uint16_t start_address);
+        void load_rom(const std::string& filename, uint16_t start_address);
         void load_fontset();
+
+        // For debugging
+        void dump(uint16_t start, uint16_t length) const;
 };

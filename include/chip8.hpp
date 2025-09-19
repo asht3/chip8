@@ -17,7 +17,7 @@ class Chip8 {
         void emulate_cycle();
         void run();
         void stop();
-
+        void load_rom(const char* filename);
         Display& get_display();
         bool is_running();
 };

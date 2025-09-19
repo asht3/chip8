@@ -1,6 +1,9 @@
 #include "../include/memory.hpp"
 #include <algorithm>
 #include <stdexcept>
+#include <fstream>
+#include <iostream> // For debugging output
+#include <iomanip>  // For std::setw and std::setfill
 
 Memory::Memory() {
     reset();
@@ -12,9 +15,17 @@ void Memory::reset() {
     load_fontset();
 }
 
-// uint8_t* Memory::get_memory() {
-//     return memory;
-// }
+void Memory::dump(uint16_t start, uint16_t length) const {
+    std::cout << "Memory dump from 0x" << std::hex << start << ":\n";
+    for (uint16_t i = start; i < start + length; i++) {
+        if ((i - start) % 16 == 0) {
+            std::cout << "\n0x" << std::hex << i << ": ";
+        }
+        std::cout << std::hex << std::setw(2) << std::setfill('0') 
+                  << static_cast<int>(memory[i]) << " ";
+    }
+    std::cout << std::endl;
+}
 
 uint8_t Memory::read(uint16_t address) const {
     if (address >= 4096) {
@@ -30,31 +41,27 @@ void Memory::write(uint16_t address, uint8_t value) {
     memory[address] = value;
 }
 
-void Memory::load_rom(const char* filename, uint16_t start_address) {
+void Memory::load_rom(const std::string& filename, uint16_t start_address) {
     // Open ROM file in binary mode
-    FILE* file = fopen(filename, "rb");
+    std::ifstream file(filename, std::ios::binary);
     if (!file) {
-        throw std::runtime_error("Failed to open ROM file");
+        throw std::runtime_error("Failed to open ROM file"); 
     }
 
     // Get file size
-    fseek(file, 0, SEEK_END);
-    long file_size = ftell(file);
-    fseek(file, 0, SEEK_SET);
+    std::streamsize file_size = file.tellg();
+    file.seekg(0, std::ios::beg);
 
     // Check if ROM fits in memory
     if (start_address + file_size > 4096) {
-        fclose(file);
         throw std::runtime_error("ROM size exceeds memory bounds");
     }
 
     // Read file contents into memory starting at start_address
-    ssize_t read_size = fread(&memory[start_address], 1, file_size, file);
-    if (read_size != file_size) {
-        fclose(file);
+    file.read(reinterpret_cast<char*>(&memory[start_address]), file_size);
+    if (!file) {
         throw std::runtime_error("Failed to read ROM file");
     }
-    fclose(file);
 }
 
 void Memory::load_fontset() {

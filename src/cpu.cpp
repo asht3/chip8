@@ -1,6 +1,7 @@
 #include "../include/cpu.hpp"
 #include <algorithm>
 #include <stdexcept>
+#include <iostream> // For debugging output
 
 CPU::CPU() {
     reset();
@@ -34,6 +35,7 @@ uint16_t CPU::pop_stack() {
 void CPU::execute_cycle(Memory& memory, Display& display, Input& keys) {
     uint16_t opcode = fetch_opcode(memory);
     PC += 2; // Move to next instruction by default
+    std::cout << "PC: 0x" << std::hex << PC << " Opcode: 0x" << opcode << std::endl; // Debugging output
 
     switch (opcode & 0xF000) {
         case 0x0000:
