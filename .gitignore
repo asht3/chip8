@@ -4,6 +4,8 @@ obj/
 
 # Other files
 old_ver/
+# Will add later
+Resources/
 
 # Executables
 chip8
