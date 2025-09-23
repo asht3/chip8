@@ -44,7 +44,6 @@ void Memory::write(uint16_t address, uint8_t value) {
 void Memory::load_rom(const std::string& filename, uint16_t start_address) {
     std::cout << "Opening: " << filename << std::endl;
     
-    // Use C-style I/O which is more reliable for binary files
     FILE* file = fopen(filename.c_str(), "rb");
     if (!file) {
         throw std::runtime_error("Failed to open file: " + std::string(strerror(errno)));
@@ -53,20 +52,21 @@ void Memory::load_rom(const std::string& filename, uint16_t start_address) {
     // Get file size
     fseek(file, 0, SEEK_END);
     long unsigned int file_size = ftell(file);
-    fseek(file, 0, SEEK_SET);
+    // fseek(file, 0, SEEK_SET);
+    rewind(file);
     
-    std::cout << "File size: " << file_size << " bytes" << std::endl;
+    std::cout << "File size: " << file_size << " bytes" << std::endl; // Debug
     
     if (start_address + file_size > sizeof(memory)) {
         fclose(file);
         throw std::runtime_error("ROM too large for memory");
     }
     
-    // Read the entire file
-    auto bytes_read = fread(&memory[start_address], 1, file_size, file);
+    // Read the file
+    long unsigned int bytes_read = fread(&memory[start_address], 1, file_size, file);
     fclose(file);
     
-    std::cout << "Bytes actually read: " << bytes_read << std::endl;
+    std::cout << "Bytes actually read: " << bytes_read << std::endl; // Debug
     
     if (bytes_read != file_size) {
         throw std::runtime_error("Failed to read complete file. Read " + 
@@ -75,12 +75,12 @@ void Memory::load_rom(const std::string& filename, uint16_t start_address) {
     }
     
     // Verify the load
-    std::cout << "First 32 bytes of ROM:" << std::endl;
-    for (int i = 0; i < 32; i++) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') 
-                  << static_cast<int>(memory[start_address + i]) << " ";
-        if (i % 16 == 15) std::cout << std::endl;
-    }
+    // std::cout << "First 32 bytes of ROM:" << std::endl;
+    // for (int i = 0; i < 32; i++) {
+    //     std::cout << std::hex << std::setw(2) << std::setfill('0') 
+    //               << static_cast<int>(memory[start_address + i]) << " ";
+    //     if (i % 16 == 15) std::cout << std::endl;
+    // }
 }
 
 void Memory::load_fontset() {
@@ -107,7 +107,4 @@ void Memory::load_fontset() {
     for (unsigned int i = 0; i < FONTSET_SIZE; ++i) {
         memory[FONTSET_SIZE + i] = fontset[i];
     }
-    // for (unsigned int i = 0; i < FONTSET_SIZE; ++i) {
-    //     memory[i] = fontset[i];
-    // }
 }

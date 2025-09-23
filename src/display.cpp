@@ -68,31 +68,31 @@ void Display::render_to_console() const {
     //     system("clear");
     // #endif
 
-    std::cout << "+" << std::string(64, '-') << "+\n";
+    // std::cout << "+" << std::string(64, '-') << "+\n";
     
-    for (int y = 0; y < 32; y++) {
-        std::cout << "|";
-        for (int x = 0; x < 64; x++) {
-            // Try different characters for better visibility
-            if (get_pixel(x, y)) {
-                std::cout << "##";  // Solid blocks
-                // Or try: std::cout << "██"; 
-                // Or: std::cout << "[]";
-            } else {
-                std::cout << "  ";  // Two spaces
-            }
-        }
-        std::cout << "|" << std::endl;
-    }
-    
-    std::cout << "+" << std::string(64, '-') << "+\n";
-    
-    // for (uint8_t y = 0; y < 32; y++) {
-    //     for (uint8_t x = 0; x < 64; x++) {
-    //         // Use different characters for better visibility
-    //         std::cout << (get_pixel(x, y) ? "██" : "  ");
-    //         // std::cout << (get_pixel(x, y) ? "X" : " ");
+    // for (int y = 0; y < 32; y++) {
+    //     std::cout << "|";
+    //     for (int x = 0; x < 64; x++) {
+    //         // Try different characters for better visibility
+    //         if (get_pixel(x, y)) {
+    //             std::cout << "##";  // Solid blocks
+    //             // std::cout << "██"; 
+    //             // std::cout << "[]";
+    //         } else {
+    //             std::cout << "  ";  // Two spaces
+    //         }
     //     }
-    //     std::cout << std::endl;
+    //     std::cout << "|" << std::endl;
     // }
+    
+    // std::cout << "+" << std::string(64, '-') << "+\n";
+    
+    for (uint8_t y = 0; y < 32; y++) {
+        for (uint8_t x = 0; x < 64; x++) {
+            // Use different characters for better visibility
+            std::cout << (get_pixel(x, y) ? "██" : "  ");
+            // std::cout << (get_pixel(x, y) ? "X" : " ");
+        }
+        std::cout << std::endl;
+    }
 }
