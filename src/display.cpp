@@ -72,21 +72,6 @@ void Display::render_to_console() const {
     
     // for (int y = 0; y < 32; y++) {
     //     std::cout << "|";
-    //     for (int x = 0; x < 64; x++) {
-    //         // Try different characters for better visibility
-    //         if (get_pixel(x, y)) {
-    //             std::cout << "##";  // Solid blocks
-    //             // std::cout << "██"; 
-    //             // std::cout << "[]";
-    //         } else {
-    //             std::cout << "  ";  // Two spaces
-    //         }
-    //     }
-    //     std::cout << "|" << std::endl;
-    // }
-    
-    // std::cout << "+" << std::string(64, '-') << "+\n";
-    
     for (uint8_t y = 0; y < 32; y++) {
         for (uint8_t x = 0; x < 64; x++) {
             // Use different characters for better visibility
@@ -95,4 +80,54 @@ void Display::render_to_console() const {
         }
         std::cout << std::endl;
     }
+    //     std::cout << "|" << std::endl;
+    // }
+    
+    // std::cout << "+" << std::string(64, '-') << "+\n";   
+}
+
+void Display::init_sdl(const char* title = "CHIP-8", int scale = 10) {
+    if (renderer) {
+        SDL_DestroyRenderer(renderer);
+        renderer = nullptr;
+    }
+    if (window) {
+        SDL_DestroyWindow(window);
+        window = nullptr;
+    }
+
+    SDL_Init(SDL_INIT_VIDEO);
+    window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 64*scale, 32*scale, 0);
+    // renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
+    if (!window) {
+        std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+    }
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (!renderer) {
+        std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
+    }
+}
+
+void Display::cleanup_sdl() {
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+}
+
+void Display::render_to_sdl(int scale = 10) {
+    if (!renderer || !window) return;
+
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    for (int y = 0; y < 32; ++y) {
+        for (int x = 0; x < 64; ++x) {
+            if (pixels[y * 64 + x]) {
+                SDL_Rect rect = { x * scale, y * scale, scale, scale };
+                SDL_RenderFillRect(renderer, &rect);
+            }
+        }
+    }
+    SDL_RenderPresent(renderer);
 }
