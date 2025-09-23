@@ -41,45 +41,46 @@ void Memory::write(uint16_t address, uint8_t value) {
     }
     memory[address] = value;
 }
-
 void Memory::load_rom(const std::string& filename, uint16_t start_address) {
     std::cout << "Opening: " << filename << std::endl;
-
-    // Open ROM file in binary mode
-    std::ifstream file(filename, std::ios::binary | std::ios::ate);
-    if (!file) {
-        throw std::runtime_error("Failed to open ROM file"); 
-    }
-
-    // Get file size
-    std::streamsize file_size = file.tellg();
-    file.seekg(0, std::ios::beg);
-
-    std::cout << "File size: " << file_size << " bytes" << std::endl;
-    std::cout << "Loading at address: 0x" << std::hex << start_address << std::endl;
-
-    // Check if ROM fits in memory
-    if (start_address + file_size > 4096) {
-        throw std::runtime_error("ROM size exceeds memory bounds");
-    }
-
-    // Read file contents into memory starting at start_address
-    file.read(reinterpret_cast<char*>(&memory[start_address]), file_size);
-    if (!file) {
-        std::cout << "Read failed! Error: " << strerror(errno) << std::endl;
-        std::cout << "Bytes read: " << file.gcount() << std::endl;
-        throw std::runtime_error("Failed to read ROM file");
-    }
-
-    std::cout << "Successfully read " << file_size << " bytes" << std::endl;
     
-    // Verify by dumping what was read
-    std::cout << "First 16 bytes loaded: ";
-    for (int i = 0; i < 16; i++) {
+    // Use C-style I/O which is more reliable for binary files
+    FILE* file = fopen(filename.c_str(), "rb");
+    if (!file) {
+        throw std::runtime_error("Failed to open file: " + std::string(strerror(errno)));
+    }
+    
+    // Get file size
+    fseek(file, 0, SEEK_END);
+    long unsigned int file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+    
+    std::cout << "File size: " << file_size << " bytes" << std::endl;
+    
+    if (start_address + file_size > sizeof(memory)) {
+        fclose(file);
+        throw std::runtime_error("ROM too large for memory");
+    }
+    
+    // Read the entire file
+    auto bytes_read = fread(&memory[start_address], 1, file_size, file);
+    fclose(file);
+    
+    std::cout << "Bytes actually read: " << bytes_read << std::endl;
+    
+    if (bytes_read != file_size) {
+        throw std::runtime_error("Failed to read complete file. Read " + 
+                               std::to_string(bytes_read) + " of " + 
+                               std::to_string(file_size));
+    }
+    
+    // Verify the load
+    std::cout << "First 32 bytes of ROM:" << std::endl;
+    for (int i = 0; i < 32; i++) {
         std::cout << std::hex << std::setw(2) << std::setfill('0') 
                   << static_cast<int>(memory[start_address + i]) << " ";
+        if (i % 16 == 15) std::cout << std::endl;
     }
-    std::cout << std::endl;
 }
 
 void Memory::load_fontset() {

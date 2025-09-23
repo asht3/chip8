@@ -35,7 +35,15 @@ uint16_t CPU::pop_stack() {
 void CPU::execute_cycle(Memory& memory, Display& display, Input& keys) {
     uint16_t opcode = fetch_opcode(memory);
     PC += 2; // Move to next instruction by default
-    std::cout << "PC: 0x" << std::hex << PC << " Opcode: 0x" << opcode << std::endl; // Debugging output
+    // std::cout << "PC: 0x" << std::hex << PC << " Opcode: 0x" << opcode << std::endl; // Debugging output
+
+    // Debug: log specific opcodes
+    // if (opcode == 0xF00A) {  // Wait for key press
+    //     std::cout << "WAITING FOR KEY PRESS!" << std::endl;
+    // }
+    // if ((opcode & 0xF0FF) == 0xF00A) {  // Any Fx0A opcode
+    //     std::cout << "Waiting for key in register V" << std::hex << ((opcode & 0x0F00) >> 8) << std::endl;
+    // }
 
     switch (opcode & 0xF000) {
         case 0x0000:
@@ -256,25 +264,39 @@ void CPU::OP_Dxyn(Memory& memory, Display& display, uint16_t opcode) {
     
     uint8_t x = V[Vx] % 64;
     uint8_t y = V[Vy] % 32;
+    // std::cout << "DRAW: x=" << (int)x << " y=" << (int)y << " height=" << (int)height 
+    //           << " I=0x" << std::hex << I << std::endl; // DEBUG
+    
     V[0xF] = 0;  // Reset collision flag
 
     for (int row = 0; row < height; row++) {
         uint8_t sprite_byte = memory.read(I + row);
+        std::cout << "  Sprite[" << row << "]: 0x" << std::hex << (int)sprite_byte; // DEBUG
+        if (sprite_byte == 0x00) {
+            std::cout << "  Skipping blank row " << row << std::endl;
+            continue;
+        }
         
         for (int col = 0; col < 8; col++) {
             if ((sprite_byte & (0x80 >> col)) != 0) {
                 uint8_t pixel_x = (x + col) % 64;
                 uint8_t pixel_y = (y + row) % 32;
-                
+                std::cout << " X";
+
                 // Check if pixel is currently set
                 if (display.get_pixel(pixel_x, pixel_y)) {
                     V[0xF] = 1;  // Collision detected
                 }
                 
                 display.flip_pixel(pixel_x, pixel_y);
+            } else {
+                std::cout << "-"; // debug
             }
         }
+        std::cout << std::endl; // debug
     }
+    std::cout << "Collision: " << (int)V[0xF] << std::endl; // debug
+    display.set_draw_flag();
 }
 
 void CPU::OP_Ex9E(uint16_t opcode, Input& keys) {

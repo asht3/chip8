@@ -37,8 +37,8 @@ void Chip8::load_rom(const char* filename) {
         memory.load_rom(filename, cpu.START_ADDRESS);
 
         // DEBUG: Check what was loaded
-        std::cout << "ROM loaded, dumping first 32 bytes:\n";
-        memory.dump(0x200, 32);
+        // std::cout << "ROM loaded, dumping first 32 bytes:\n";
+        // memory.dump(0x200, 32);
 
         cpu.reset();
         // return true;
