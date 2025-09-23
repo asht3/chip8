@@ -331,6 +331,11 @@ void CPU::OP_Fx0A(uint16_t opcode, Input& keys) {
     // If no key is pressed, do not advance the PC
     PC -= 2; // Stay on the same instruction
 }
+// void CPU::OP_Fx0A(uint16_t opcode, Input& keys) {
+//     uint8_t x = (opcode & 0x0F00) >> 8;
+//     keys.set_wait_state(x);
+//     PC -= 2;  // Don't advance PC - wait here for key press
+// }
 
 void CPU::OP_Fx15(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;

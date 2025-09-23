@@ -19,5 +19,6 @@ class Chip8 {
         void stop();
         void load_rom(const char* filename);
         Display& get_display();
+        Input& get_input();
         bool is_running();
 };

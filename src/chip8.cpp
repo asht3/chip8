@@ -53,6 +53,10 @@ Display& Chip8::get_display() {
     return display;
 }
 
+Input& Chip8::get_input() {
+    return input;
+}
+
 bool Chip8::is_running() {
     return running;
 }
