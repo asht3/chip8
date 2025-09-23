@@ -2,8 +2,6 @@
 #include "../include/display.hpp"
 #include <thread>
 #include <iostream> // Debug
-#include "../include/memory.hpp"
-#include <iomanip>
 
 int main() {
     // Load Chip8 ROM
