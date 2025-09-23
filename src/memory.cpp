@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream> // For debugging output
 #include <iomanip>  // For std::setw and std::setfill
+#include <cstring>
 
 Memory::Memory() {
     reset();
@@ -42,8 +43,10 @@ void Memory::write(uint16_t address, uint8_t value) {
 }
 
 void Memory::load_rom(const std::string& filename, uint16_t start_address) {
+    std::cout << "Opening: " << filename << std::endl;
+
     // Open ROM file in binary mode
-    std::ifstream file(filename, std::ios::binary);
+    std::ifstream file(filename, std::ios::binary | std::ios::ate);
     if (!file) {
         throw std::runtime_error("Failed to open ROM file"); 
     }
@@ -51,6 +54,9 @@ void Memory::load_rom(const std::string& filename, uint16_t start_address) {
     // Get file size
     std::streamsize file_size = file.tellg();
     file.seekg(0, std::ios::beg);
+
+    std::cout << "File size: " << file_size << " bytes" << std::endl;
+    std::cout << "Loading at address: 0x" << std::hex << start_address << std::endl;
 
     // Check if ROM fits in memory
     if (start_address + file_size > 4096) {
@@ -60,8 +66,20 @@ void Memory::load_rom(const std::string& filename, uint16_t start_address) {
     // Read file contents into memory starting at start_address
     file.read(reinterpret_cast<char*>(&memory[start_address]), file_size);
     if (!file) {
+        std::cout << "Read failed! Error: " << strerror(errno) << std::endl;
+        std::cout << "Bytes read: " << file.gcount() << std::endl;
         throw std::runtime_error("Failed to read ROM file");
     }
+
+    std::cout << "Successfully read " << file_size << " bytes" << std::endl;
+    
+    // Verify by dumping what was read
+    std::cout << "First 16 bytes loaded: ";
+    for (int i = 0; i < 16; i++) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') 
+                  << static_cast<int>(memory[start_address + i]) << " ";
+    }
+    std::cout << std::endl;
 }
 
 void Memory::load_fontset() {

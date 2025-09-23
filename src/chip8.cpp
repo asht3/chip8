@@ -49,7 +49,9 @@ void Chip8::load_rom(const char* filename) {
     }
 }
 
-// Display& get_display();
+Display& Chip8::get_display() {
+    return display;
+}
 
 bool Chip8::is_running() {
     return running;
