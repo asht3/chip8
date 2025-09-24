@@ -382,6 +382,7 @@ void CPU::OP_Fx0A(uint16_t opcode, Input& keys) {
     keys.reset();
     waiting_for_key = true;
     key_register = Vx;
+    PC -= 2;
     // for (uint8_t i = 0; i < 16; i++) {
     //     if (keys.is_pressed(i)) {
     //         V[Vx] = i;
