@@ -13,6 +13,8 @@ class CPU {
         uint8_t sound_timer;  // Sound timer
         uint16_t stack[16];   // Stack for subroutine calls
         uint8_t SP;           // Stack pointer
+        bool waiting_for_key; // Flag for waiting for key press
+        uint8_t key_register;  // Register to store the key press
 
         uint16_t fetch_opcode(Memory& memory);
 
@@ -65,10 +67,13 @@ class CPU {
         // uint8_t get_sound_timer() const;
         uint16_t get_pc() const;
         void set_pc(uint16_t address);
+        void add_to_pc(uint16_t offset);
         // uint16_t get_I() const;
         // void set_I(uint16_t address);
         // uint8_t get_V(uint8_t index) const;
-        // void set_V(uint8_t index, uint8_t value);
+        void set_V(uint8_t index, uint8_t value);
         void push_stack(uint16_t address);
         uint16_t pop_stack();
+        bool is_waiting_for_key() const;
+        void handle_key_press(uint8_t key);
 };

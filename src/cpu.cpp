@@ -15,6 +15,8 @@ void CPU::reset() {
     sound_timer = 0;
     std::fill(std::begin(stack), std::end(stack), 0);
     SP = 0;
+    waiting_for_key = false;
+    key_register = 0xFF; // Invalid register index
 }
 
 void CPU::push_stack(uint16_t address) {
@@ -91,6 +93,7 @@ void CPU::execute_cycle(Memory& memory, Display& display, Input& keys) {
             switch (opcode & 0x00FF) {
                 case 0x0007: OP_Fx07(opcode); break;
                 case 0x000A: OP_Fx0A(opcode, keys); break;
+                // case 0x000A: OP_Fx0A(opcode); break;
                 case 0x0015: OP_Fx15(opcode); break;
                 case 0x0018: OP_Fx18(opcode); break;
                 case 0x001E: OP_Fx1E(opcode); break;
@@ -217,22 +220,38 @@ void CPU::OP_8xy3(uint16_t opcode) {
 void CPU::OP_8xy4(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t Vy = (opcode & 0x00F0) >> 4;
-    uint16_t sum = V[Vx] + V[Vy];
-    V[0xF] = (sum > 0xFF) ? 1 : 0; // Set carry flag
+
+    uint8_t original_Vx = V[Vx];
+    uint8_t original_Vy = V[Vy];
+    
+    uint16_t sum = original_Vx + original_Vy;
+    
     V[Vx] = sum & 0xFF; // Keep only the lower 8 bits
+    V[0xF] = (sum > 0xFF) ? 1 : 0; // Set carry flag
     // PC += 2;
 }
 
 void CPU::OP_8xy5(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t Vy = (opcode & 0x00F0) >> 4;
-    V[0xF] = (V[Vx] > V[Vy]) ? 1 : 0;
-    V[Vx] -= V[Vy];
+    uint8_t original_Vx = V[Vx];
+    uint8_t original_Vy = V[Vy];
+    
+    // V[0xF] = (original_Vx > original_Vy) ? 1 : 0;
+    V[0xF] = (original_Vx >= original_Vy) ? 1 : 0;
+    V[Vx] = original_Vx - original_Vy;
+    // V[0xF] = (V[Vx] > V[Vy]) ? 1 : 0;
+    // V[Vx] -= V[Vy];
     // PC += 2;
 }
 
 void CPU::OP_8xy6(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
+    // uint8_t Vy = (opcode & 0x00F0) >> 4;
+    // uint8_t value = V[Vx];
+
+    // V[0xF] = value & 0x1;
+    // V[Vx] = value >> 1;
     V[0xF] = V[Vx] & 0x1; // Store LSB of Vx in VF
     V[Vx] >>= 1; // Shift right by 1 (divide by 2)
     // PC += 2;
@@ -350,16 +369,24 @@ void CPU::OP_Fx07(uint16_t opcode) {
 }
 
 void CPU::OP_Fx0A(uint16_t opcode, Input& keys) {
+// void CPU::OP_Fx0A(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
-    for (uint8_t i = 0; i < 16; i++) {
-        if (keys.is_pressed(i)) {
-            V[Vx] = i;
-            // PC += 2;
-            return;
-        }
-    }
+    keys.reset();
+    waiting_for_key = true;
+    key_register = Vx;
+    // for (uint8_t i = 0; i < 16; i++) {
+    //     if (keys.is_pressed(i)) {
+    //         V[Vx] = i;
+    //         // PC += 2;
+    //         return;
+    //     }
+    // }
+    // int key = keys.wait_for_keypress();
+    // if (key != -1) {
+    //     V[Vx] = key;
+    //     // PC += 2;
+    // }
     // If no key is pressed, do not advance the PC
-    // PC -= 2;
 }
 
 void CPU::OP_Fx15(uint16_t opcode) {
@@ -419,4 +446,28 @@ uint16_t CPU::get_pc() const {
 
 void CPU::set_pc(uint16_t address) {
     PC = address;
+}
+
+void CPU::add_to_pc(uint16_t offset) {
+    PC += offset;
+}
+
+void CPU::set_V(uint8_t index, uint8_t value) {
+    if (index < 16) {
+        V[index] = value;
+    } else {
+        throw std::out_of_range("Register index out of range");
+    }
+}
+
+bool CPU::is_waiting_for_key() const { 
+    return waiting_for_key;
+}
+
+void CPU::handle_key_press(uint8_t key) {
+    if (waiting_for_key) {
+        V[key_register] = key;
+        waiting_for_key = false;
+        PC += 2;  // Advance to next instruction
+    }
 }
