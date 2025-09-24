@@ -105,6 +105,6 @@ void Memory::load_fontset() {
 
     // Start loading fontset at memory location 0x50 (80)
     for (unsigned int i = 0; i < FONTSET_SIZE; ++i) {
-        memory[FONTSET_SIZE + i] = fontset[i];
+        memory[0x50 + i] = fontset[i];
     }
 }

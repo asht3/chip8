@@ -34,13 +34,15 @@ void Chip8::stop() {
 
 void Chip8::load_rom(const char* filename) {
     try {
+        cpu.reset();
         memory.load_rom(filename, cpu.START_ADDRESS);
-
+        for (int i = 0; i < 10; ++i) {
+            printf("Opcode at %03X: %02X%02X\n", 0x200 + i*2, memory.read(0x200 + i*2), memory.read(0x200 + i*2 + 1));
+        }
         // DEBUG: Check what was loaded
         // std::cout << "ROM loaded, dumping first 32 bytes:\n";
         // memory.dump(0x200, 32);
 
-        cpu.reset();
         // return true;
     } catch (std::exception& e) {
         std::cerr << "Load ROM error: " << e.what() << std::endl;

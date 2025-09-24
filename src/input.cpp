@@ -14,9 +14,9 @@ void Input::reset() {
     std::fill(std::begin(keys), std::end(keys), false);
 }
 
-void Input::handle_input_sdl(Input& chip8_input) {
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
+void Input::handle_input_sdl(const SDL_Event& event, Input& chip8_input) {
+    // SDL_Event event;
+    // while (SDL_PollEvent(&event)) {
         switch (event.type) {
             case SDL_QUIT:
                 break;
@@ -55,7 +55,7 @@ void Input::handle_input_sdl(Input& chip8_input) {
                 }
                 break;
         }
-    }
+    // }
 }
 
 void Input::set_key(uint8_t key, bool pressed) {
