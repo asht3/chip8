@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <iostream> // For debugging output
+#include <thread> // debug
 
 CPU::CPU() {
     reset();
@@ -371,6 +372,13 @@ void CPU::OP_Fx07(uint16_t opcode) {
 void CPU::OP_Fx0A(uint16_t opcode, Input& keys) {
 // void CPU::OP_Fx0A(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
+    // bool any_key_pressed = false;
+    // for (int i = 0; i < 16; i++) {
+    //     if (keys.is_pressed(i)) {
+    //         any_key_pressed = true;
+    //         break;
+    //     }
+    // }
     keys.reset();
     waiting_for_key = true;
     key_register = Vx;
@@ -381,11 +389,7 @@ void CPU::OP_Fx0A(uint16_t opcode, Input& keys) {
     //         return;
     //     }
     // }
-    // int key = keys.wait_for_keypress();
-    // if (key != -1) {
-    //     V[Vx] = key;
-    //     // PC += 2;
-    // }
+    std::cout << "=== ENTERING WAIT STATE ===" << std::endl;
     // If no key is pressed, do not advance the PC
 }
 
@@ -469,5 +473,6 @@ void CPU::handle_key_press(uint8_t key) {
         V[key_register] = key;
         waiting_for_key = false;
         PC += 2;  // Advance to next instruction
+        std::cout << "=== EXITING WAIT STATE ===" << std::endl;
     }
 }

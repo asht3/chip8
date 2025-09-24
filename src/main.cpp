@@ -9,20 +9,33 @@ int main() {
     Chip8 chip8;
     // chip8.load_rom("./roms/4-flags.ch8");
     chip8.load_rom("./roms/6-keypad.ch8");
+
     chip8.get_display().init_sdl("CHIP-8", 10);
 
     // Start emulation
     chip8.run();
     SDL_Event event;
     while (chip8.is_running()) {
+        if (!chip8.get_cpu().is_waiting_for_key()) {
+            chip8.emulate_cycle();
+        } else {
+            chip8.get_cpu().update_timers();
+        }
+        
+        if (chip8.get_display().needs_redraw()) {
+            chip8.get_display().render_to_sdl(10);
+            chip8.get_display().clear_redraw_flag();
+            // Small delay to see the display
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 chip8.stop();
             } else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
                 chip8.stop();
             } else {
-                chip8.get_input().handle_input_sdl(event, chip8.get_input());
-                 if (event.type == SDL_KEYDOWN && chip8.get_cpu().is_waiting_for_key()) {
+                if (event.type == SDL_KEYDOWN && chip8.get_cpu().is_waiting_for_key()) {
                     uint8_t chip8_key = 0xFF;
                     switch (event.key.keysym.sym) {
                         case SDLK_1: chip8_key = 0x1; break;
@@ -44,26 +57,10 @@ int main() {
                     }
                     
                     if (chip8_key != 0xFF) {
-                        chip8.get_input().set_key(chip8_key, true);
                         chip8.get_cpu().handle_key_press(chip8_key);
-                        chip8.get_input().set_key(chip8_key, false);
                     }
-                }
+                } else chip8.get_input().handle_input_sdl(event, chip8.get_input());
             }
-        }
-  
-        // chip8.emulate_cycle();
-        if (!chip8.get_cpu().is_waiting_for_key()) {
-            chip8.emulate_cycle();
-        } else {
-            chip8.get_cpu().update_timers();
-        }
-
-        if (chip8.get_display().needs_redraw()) {
-            chip8.get_display().render_to_sdl(10);
-            chip8.get_display().clear_redraw_flag();
-            // Small delay to see the display
-            std::this_thread::sleep_for(std::chrono::milliseconds(2));
         }
     }
     chip8.get_display().cleanup_sdl();
