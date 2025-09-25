@@ -21,8 +21,8 @@ bool Display::draw_sprite(uint8_t x, uint8_t y, uint8_t* sprite, uint8_t height)
         uint8_t sprite_row = sprite[row];
         for (int col = 0; col < 8; col++) {
             if ((sprite_row & (0x80 >> col)) != 0) {  // Check if the bit is set
-                int px = (x + col) % 64;              // Wrap around horizontally
-                int py = (y + row) % 32;              // Wrap around vertically
+                int px = (x + col) % WIDTH;              // Wrap around horizontally
+                int py = (y + row) % HEIGHT;              // Wrap around vertically
                 if (xor_pixel(px, py)) {
                     collision = true;                  // Collision detected
                 }
@@ -34,22 +34,22 @@ bool Display::draw_sprite(uint8_t x, uint8_t y, uint8_t* sprite, uint8_t height)
 }
 
 bool Display::get_pixel(uint8_t x, uint8_t y) const {
-    return pixels[x + y * 64];
+    return pixels[x + y * WIDTH];
 }
 
 void Display::set_pixel(uint8_t x, uint8_t y, bool value) {
-    pixels[x + y * 64] = value;
+    pixels[x + y * WIDTH] = value;
 }
 
 bool Display::xor_pixel(uint8_t x, uint8_t y) {
-    int index = x + y * 64;
+    int index = x + y * WIDTH;
     bool old_value = pixels[index];
     pixels[index] = pixels[index] ^ true;  // XOR with 1
     return old_value && !pixels[index];    // Collision if was on and now off
 }
 
 void Display::flip_pixel(uint8_t x, uint8_t y) {
-    pixels[x + y * 64] = !pixels[x + y * 64];
+    pixels[x + y * WIDTH] = !pixels[x + y * WIDTH];
 }
 
 bool Display::needs_redraw() {
@@ -72,8 +72,8 @@ void Display::render_to_console() const {
     
     // for (int y = 0; y < 32; y++) {
     //     std::cout << "|";
-    for (uint8_t y = 0; y < 32; y++) {
-        for (uint8_t x = 0; x < 64; x++) {
+    for (uint8_t y = 0; y < HEIGHT; y++) {
+        for (uint8_t x = 0; x < WIDTH; x++) {
             // Use different characters for better visibility
             std::cout << (get_pixel(x, y) ? "██" : "  ");
             // std::cout << (get_pixel(x, y) ? "X" : " ");
@@ -97,7 +97,7 @@ void Display::init_sdl(const char* title = "CHIP-8", int scale = 10) {
     }
 
     SDL_Init(SDL_INIT_VIDEO);
-    window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 64*scale, 32*scale, 0);
+    window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH*scale, HEIGHT*scale, 0);
     // renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
     if (!window) {
@@ -121,9 +121,9 @@ void Display::render_to_sdl(int scale = 10) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    for (int y = 0; y < 32; ++y) {
-        for (int x = 0; x < 64; ++x) {
-            if (pixels[y * 64 + x]) {
+    for (int y = 0; y < HEIGHT; ++y) {
+        for (int x = 0; x < WIDTH; ++x) {
+            if (pixels[y * WIDTH + x]) {
                 SDL_Rect rect = { x * scale, y * scale, scale, scale };
                 SDL_RenderFillRect(renderer, &rect);
             }
