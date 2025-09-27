@@ -200,6 +200,7 @@ void CPU::OP_8xy1(uint16_t opcode) {
     uint8_t Vy = (opcode & 0x00F0) >> 4;
     // V[Vx] |= Vy;
     V[Vx] = V[Vx] | V[Vy];
+    V[0xF] = 0;
     // PC += 2;
 }
 
@@ -208,6 +209,7 @@ void CPU::OP_8xy2(uint16_t opcode) {
     uint8_t Vy = (opcode & 0x00F0) >> 4;
     // V[Vx] &= Vy;
     V[Vx] = V[Vx] & V[Vy];
+    V[0xF] = 0;
     // PC += 2;
 }
 
@@ -215,6 +217,7 @@ void CPU::OP_8xy3(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t Vy = (opcode & 0x00F0) >> 4;
     V[Vx] = V[Vx] ^ V[Vy];
+    V[0xF] = 0;
     // PC += 2;
 }
 
@@ -314,31 +317,20 @@ void CPU::OP_Dxyn(Memory& memory, Display& display, uint16_t opcode) {
 
     for (int row = 0; row < height; row++) {
         uint8_t sprite_byte = memory.read(I + row);
-        // std::cout << "  Sprite[" << row << "]: 0x" << std::hex << (int)sprite_byte; // DEBUG
-        // if (sprite_byte == 0x00) {
-        //     std::cout << "  Skipping blank row " << row << std::endl;
-        //     continue;
-        // }
         
         for (int col = 0; col < 8; col++) {
             if ((sprite_byte & (0x80 >> col)) != 0) {
                 uint8_t pixel_x = (x + col) % 64;
                 uint8_t pixel_y = (y + row) % 32;
-                // std::cout << " X"; // debug
-
                 // Check if pixel is currently set
                 if (display.get_pixel(pixel_x, pixel_y)) {
                     V[0xF] = 1;  // Collision detected
                 }
                 
                 display.flip_pixel(pixel_x, pixel_y);
-            } else {
-                // std::cout << "-"; // debug
             }
         }
-        // std::cout << std::endl; // debug
     }
-    // std::cout << "Collision: " << (int)V[0xF] << std::endl; // debug
     display.set_draw_flag();
     // PC += 2;
 }
