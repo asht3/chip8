@@ -16,17 +16,17 @@ void Memory::reset() {
     load_fontset();
 }
 
-void Memory::dump(uint16_t start, uint16_t length) const {
-    std::cout << "Memory dump from 0x" << std::hex << start << ":\n";
-    for (uint16_t i = start; i < start + length; i++) {
-        if ((i - start) % 16 == 0) {
-            std::cout << "\n0x" << std::hex << i << ": ";
-        }
-        std::cout << std::hex << std::setw(2) << std::setfill('0') 
-                  << static_cast<int>(memory[i]) << " ";
-    }
-    std::cout << std::endl;
-}
+// void Memory::dump(uint16_t start, uint16_t length) const {
+//     std::cout << "Memory dump from 0x" << std::hex << start << ":\n";
+//     for (uint16_t i = start; i < start + length; i++) {
+//         if ((i - start) % 16 == 0) {
+//             std::cout << "\n0x" << std::hex << i << ": ";
+//         }
+//         std::cout << std::hex << std::setw(2) << std::setfill('0') 
+//                   << static_cast<int>(memory[i]) << " ";
+//     }
+//     std::cout << std::endl;
+// }
 
 uint8_t Memory::read(uint16_t address) const {
     if (address >= 4096) {
@@ -42,7 +42,7 @@ void Memory::write(uint16_t address, uint8_t value) {
     memory[address] = value;
 }
 void Memory::load_rom(const std::string& filename, uint16_t start_address) {
-    std::cout << "Opening: " << filename << std::endl;
+    // std::cout << "Opening: " << filename << std::endl;
     
     FILE* file = fopen(filename.c_str(), "rb");
     if (!file) {
@@ -52,7 +52,6 @@ void Memory::load_rom(const std::string& filename, uint16_t start_address) {
     // Get file size
     fseek(file, 0, SEEK_END);
     long unsigned int file_size = ftell(file);
-    // fseek(file, 0, SEEK_SET);
     rewind(file);
     
     std::cout << "File size: " << file_size << " bytes" << std::endl; // Debug

@@ -16,5 +16,5 @@ class Memory {
         void load_fontset();
 
         // For debugging
-        void dump(uint16_t start, uint16_t length) const;
+        // void dump(uint16_t start, uint16_t length) const;
 };
