@@ -222,15 +222,15 @@ void CPU::OP_8xy5(uint16_t opcode) {
 
 void CPU::OP_8xy6(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
-    uint8_t Vy = (opcode & 0x00F0) >> 4;
+    // uint8_t Vy = (opcode & 0x00F0) >> 4;
 
     // Original
-    // V[0xF] = V[Vx] & 0x1; // Store LSB of Vx in VF
-    // V[Vx] >>= 1; // Shift right by 1 (divide by 2)
+    V[0xF] = V[Vx] & 0x1; // Store LSB of Vx in VF
+    V[Vx] >>= 1; // Shift right by 1 (divide by 2)
     
     // Modern
-    V[0xF] = V[Vy] & 0x1;
-    V[Vx] = V[Vy] >> 1;
+    // V[0xF] = V[Vy] & 0x1;
+    // V[Vx] = V[Vy] >> 1;
 }
 
 void CPU::OP_8xy7(uint16_t opcode) {
@@ -242,15 +242,15 @@ void CPU::OP_8xy7(uint16_t opcode) {
 
 void CPU::OP_8xyE(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
-    uint8_t Vy = (opcode & 0x00F0) >> 4;
+    // uint8_t Vy = (opcode & 0x00F0) >> 4;
 
     // Original
-    // V[0xF] = (V[Vx] & 0x80) >> 7; // Store MSB of Vx in VF
-    // V[Vx] <<= 1; // Shift left by 1 (multiply by 2)
+    V[0xF] = (V[Vx] & 0x80) >> 7; // Store MSB of Vx in VF
+    V[Vx] <<= 1; // Shift left by 1 (multiply by 2)
 
     // Modern
-    V[0xF] = (V[Vy] & 0x80) >> 7;
-    V[Vx] = V[Vy] << 1;
+    // V[0xF] = (V[Vy] & 0x80) >> 7;
+    // V[Vx] = V[Vy] << 1;
 }
 
 void CPU::OP_9xy0(uint16_t opcode) {

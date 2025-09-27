@@ -19,25 +19,12 @@ bool Display::draw_sprite(uint8_t x, uint8_t y, uint8_t* sprite, uint8_t height)
     bool collision = false;
     for (int row = 0; row < height; row++) {
         uint8_t sprite_row = sprite[row];
-        // for (int col = 0; col < 8; col++) {
-        //     if ((sprite_row & (0x80 >> col)) != 0) { // Check if the bit is set
-        //         int px = (x + col) % WIDTH;
-        //         int py = (y + row) % HEIGHT;
-        //         if (xor_pixel(px, py)) {
-        //             collision = true; // Collision detected
-        //         }
-        //     }
-        // }
         for (int col = 0; col < 8; col++) {
-            if ((sprite_row & (0x80 >> col)) != 0) {
-                int px = x + col;
-                int py = y + row;
-                
-                // Clip
-                if (px >= 0 && px < WIDTH && py >= 0 && py < HEIGHT) {
-                    if (xor_pixel(px, py)) {
-                        collision = true;
-                    }
+            if ((sprite_row & (0x80 >> col)) != 0) { // Check if the bit is set
+                int px = (x + col) % WIDTH;
+                int py = (y + row) % HEIGHT;
+                if (xor_pixel(px, py)) {
+                    collision = true; // Collision detected
                 }
             }
         }
@@ -47,17 +34,14 @@ bool Display::draw_sprite(uint8_t x, uint8_t y, uint8_t* sprite, uint8_t height)
 }
 
 bool Display::get_pixel(uint8_t x, uint8_t y) const {
-    if (x >= WIDTH || y >= HEIGHT) return false;
     return pixels[x + y * WIDTH];
 }
 
 void Display::set_pixel(uint8_t x, uint8_t y, bool value) {
-    if (x >= WIDTH || y >= HEIGHT) return;
     pixels[x + y * WIDTH] = value;
 }
 
 bool Display::xor_pixel(uint8_t x, uint8_t y) {
-    if (x >= WIDTH || y >= HEIGHT) return false;
     int index = x + y * WIDTH;
     bool old_value = pixels[index];
     pixels[index] = pixels[index] ^ true;  // XOR with 1
@@ -65,7 +49,6 @@ bool Display::xor_pixel(uint8_t x, uint8_t y) {
 }
 
 void Display::flip_pixel(uint8_t x, uint8_t y) {
-    if (x >= WIDTH || y >= HEIGHT) return;
     pixels[x + y * WIDTH] = !pixels[x + y * WIDTH];
 }
 
@@ -89,7 +72,6 @@ void Display::init_sdl(const char* title = "CHIP-8", int scale = 10) {
 
     SDL_Init(SDL_INIT_VIDEO);
     window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH*scale, HEIGHT*scale, 0);
-    // renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
     if (!window) {
         std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
