@@ -70,15 +70,3 @@ bool Chip8::is_running() {
 CPU& Chip8::get_cpu() {
     return cpu;
 }
-
-// void Chip8::handle_key_press(uint8_t key) {
-//     if (waiting_for_key) {
-//         // Store the key in the CPU register
-//         uint8_t register_index = input.get_wait_register();
-//         cpu.set_V(register_index, key);
-        
-//         // Resume execution
-//         waiting_for_key = false;
-//         input.handle_key_press(key);
-//     }
-// }

@@ -44,44 +44,6 @@ void Input::handle_input_sdl(const SDL_Event& event, Input& chip8_input) {
             case SDLK_v: chip8_input.set_key(0xF, pressed); break;
         }
     }
-    // switch (event.type) {
-    //     case SDL_QUIT:
-    //         break;
-            
-    //     case SDL_KEYDOWN:
-    //     case SDL_KEYUP:
-    //         bool pressed = (event.type == SDL_KEYDOWN);
-    //         switch (event.key.keysym.sym) {
-    //             // Row 1: 1 2 3 4
-    //             case SDLK_1: chip8_input.set_key(0x1, pressed); break;
-    //             case SDLK_2: chip8_input.set_key(0x2, pressed); break;
-    //             case SDLK_3: chip8_input.set_key(0x3, pressed); break;
-    //             case SDLK_4: chip8_input.set_key(0xC, pressed); break;
-                
-    //             // Row 2: Q W E R
-    //             case SDLK_q: chip8_input.set_key(0x4, pressed); break;
-    //             case SDLK_w: chip8_input.set_key(0x5, pressed); break;
-    //             case SDLK_e: chip8_input.set_key(0x6, pressed); break;
-    //             case SDLK_r: chip8_input.set_key(0xD, pressed); break;
-                
-    //             // Row 3: A S D F
-    //             case SDLK_a: chip8_input.set_key(0x7, pressed); break;
-    //             case SDLK_s: chip8_input.set_key(0x8, pressed); break;
-    //             case SDLK_d: chip8_input.set_key(0x9, pressed); break;
-    //             case SDLK_f: chip8_input.set_key(0xE, pressed); break;
-                
-    //             // Row 4: Z X C V
-    //             case SDLK_z: chip8_input.set_key(0xA, pressed); break;
-    //             case SDLK_x: chip8_input.set_key(0x0, pressed); break;
-    //             case SDLK_c: chip8_input.set_key(0xB, pressed); break;
-    //             case SDLK_v: chip8_input.set_key(0xF, pressed); break;
-                
-    //             case SDLK_ESCAPE:
-    //                 // Quit on escape
-    //                 break;
-    //         }
-    //         break;
-    // }
 }
 
 void Input::set_key(uint8_t key, bool pressed) {
@@ -105,25 +67,4 @@ uint8_t Input::wait_for_keypress() {
     }
     return 0xFF; // Indicate no key is pressed
 }
-
-// bool Input::is_waiting_for_key() const {
-//     return waiting_for_key;
-// }
-
-// void Input::set_wait_state(uint8_t register_index) {
-//     waiting_for_key = true;
-//     wait_register = register_index;
-//     // std::cout << "Waiting for key press for register V" << std::hex << (int)register_index << std::endl;
-// }
-
-// void Input::handle_key_press(uint8_t key) {
-//     if (key < 16) {
-//         keys[key] = true;
-//         waiting_for_key = false;
-//     }
-// }
-
-// uint8_t Input::get_wait_register() const {
-//     return wait_register;
-// }
 

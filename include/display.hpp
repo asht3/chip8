@@ -22,7 +22,6 @@ class Display {
         void flip_pixel(uint8_t x, uint8_t y);
         bool needs_redraw();
         void clear_redraw_flag();
-        void render_to_console() const; // For terminal rendering
 
         // For SDL rendering
         void init_sdl(const char* title, int scale);

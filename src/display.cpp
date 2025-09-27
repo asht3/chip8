@@ -20,11 +20,11 @@ bool Display::draw_sprite(uint8_t x, uint8_t y, uint8_t* sprite, uint8_t height)
     for (int row = 0; row < height; row++) {
         uint8_t sprite_row = sprite[row];
         for (int col = 0; col < 8; col++) {
-            if ((sprite_row & (0x80 >> col)) != 0) {  // Check if the bit is set
-                int px = (x + col) % WIDTH;              // Wrap around horizontally
-                int py = (y + row) % HEIGHT;              // Wrap around vertically
+            if ((sprite_row & (0x80 >> col)) != 0) { // Check if the bit is set
+                int px = (x + col) % WIDTH; // Wrap around horizontally
+                int py = (y + row) % HEIGHT; // Wrap around vertically
                 if (xor_pixel(px, py)) {
-                    collision = true;                  // Collision detected
+                    collision = true; // Collision detected
                 }
             }
         }
@@ -58,32 +58,6 @@ bool Display::needs_redraw() {
 
 void Display::clear_redraw_flag() {
     draw_flag = false;
-}
-
-void Display::render_to_console() const {
-    // Clear terminal (platform-specific)
-    // #ifdef _WIN32
-    //     system("cls");
-    // #else
-    //     system("clear");
-    // #endif
-
-    // std::cout << "+" << std::string(64, '-') << "+\n";
-    
-    // for (int y = 0; y < 32; y++) {
-    //     std::cout << "|";
-    for (uint8_t y = 0; y < HEIGHT; y++) {
-        for (uint8_t x = 0; x < WIDTH; x++) {
-            // Use different characters for better visibility
-            std::cout << (get_pixel(x, y) ? "██" : "  ");
-            // std::cout << (get_pixel(x, y) ? "X" : " ");
-        }
-        std::cout << std::endl;
-    }
-    //     std::cout << "|" << std::endl;
-    // }
-    
-    // std::cout << "+" << std::string(64, '-') << "+\n";   
 }
 
 void Display::init_sdl(const char* title = "CHIP-8", int scale = 10) {
