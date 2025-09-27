@@ -14,5 +14,4 @@ class Input {
         void handle_input_sdl(const SDL_Event& event, Input& chip8_input);
         void set_key(uint8_t key, bool pressed);
         bool is_pressed(int key);
-        uint8_t wait_for_keypress();
 };

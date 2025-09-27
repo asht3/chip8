@@ -58,13 +58,3 @@ bool Input::is_pressed(int key) {
     }
     return keys[key];
 }
-
-uint8_t Input::wait_for_keypress() {
-    for (uint8_t i = 0; i < 16; i++) {
-        if (keys[i]) {
-            return i;
-        }
-    }
-    return 0xFF; // Indicate no key is pressed
-}
-
