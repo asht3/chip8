@@ -445,6 +445,10 @@ void CPU::OP_Fx65(uint16_t opcode, Memory& memory) {
     // PC += 2;
 }
 
+uint8_t CPU::get_sound_timer() const {
+    return sound_timer;
+}
+
 uint16_t CPU::get_pc() const {
     return PC;
 }

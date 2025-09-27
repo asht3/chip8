@@ -64,7 +64,7 @@ class CPU {
         // void set_delay_timer(uint8_t value);
         // uint8_t get_delay_timer() const;
         // void set_sound_timer(uint8_t value);
-        // uint8_t get_sound_timer() const;
+        uint8_t get_sound_timer() const;
         uint16_t get_pc() const;
         void set_pc(uint16_t address);
         void add_to_pc(uint16_t offset);

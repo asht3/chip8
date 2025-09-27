@@ -3,7 +3,7 @@ CXXFLAGS = -Wall -Wextra -Werror -g -Iinclude
 LDFLAGS += -lSDL2
 
 TARGET = chip8
-SRCS = src/chip8.cpp src/main.cpp src/cpu.cpp src/display.cpp src/input.cpp src/memory.cpp
+SRCS = src/chip8.cpp src/main.cpp src/cpu.cpp src/display.cpp src/input.cpp src/memory.cpp src/sound.cpp
 OBJS = $(patsubst src/%.cpp, obj/%.o, $(SRCS))
 
 $(TARGET): $(OBJS)

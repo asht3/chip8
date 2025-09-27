@@ -1,6 +1,8 @@
 #include "../include/chip8.hpp"
 #include "../include/display.hpp"
 #include "../include/input.hpp"
+#include "../include/cpu.hpp"
+#include "../include/sound.hpp"
 #include <thread>
 #include <iostream> // Debug
 
@@ -8,9 +10,17 @@ int main() {
     // Load Chip8 ROM
     Chip8 chip8;
     // chip8.load_rom("./roms/4-flags.ch8");
-    chip8.load_rom("./roms/5-quirks.ch8");
+    chip8.load_rom("./roms/7-beep.ch8");
 
     chip8.get_display().init_sdl("CHIP-8", 10);
+    
+    // Initialize sound
+    Sound sound;
+    if (!sound.init()) {
+        std::cerr << "Failed to initialize sound." << std::endl;
+        return -1;
+    }
+    CPU& cpu = chip8.get_cpu();
 
     // Start emulation
     chip8.run();
@@ -20,6 +30,12 @@ int main() {
             chip8.emulate_cycle();
         } else {
             chip8.get_cpu().update_timers();
+        }
+
+        if (cpu.get_sound_timer() > 0) {
+            sound.beep();
+        } else {
+            sound.stop();
         }
         
         if (chip8.get_display().needs_redraw()) {
