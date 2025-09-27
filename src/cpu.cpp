@@ -1,8 +1,8 @@
 #include "../include/cpu.hpp"
 #include <algorithm>
 #include <stdexcept>
-#include <iostream> // For debugging output
-#include <thread> // debug
+// #include <iostream> // For debugging output
+// #include <thread> // debug
 
 CPU::CPU() {
     reset();
@@ -38,16 +38,6 @@ uint16_t CPU::pop_stack() {
 void CPU::execute_cycle(Memory& memory, Display& display, Input& keys) {
     uint16_t opcode = fetch_opcode(memory);
     PC += 2; // Move to next instruction
-
-    // std::cout << "PC: 0x" << std::hex << PC << " Opcode: 0x" << opcode << std::endl; // Debugging output
-
-    // Debug: log specific opcodes
-    // if (opcode == 0xF00A) {  // Wait for key press
-    //     std::cout << "WAITING FOR KEY PRESS!" << std::endl;
-    // }
-    // if ((opcode & 0xF0FF) == 0xF00A) {  // Any Fx0A opcode
-    //     std::cout << "Waiting for key in register V" << std::hex << ((opcode & 0x0F00) >> 8) << std::endl;
-    // }
 
     switch (opcode & 0xF000) {
         case 0x0000:
@@ -94,7 +84,6 @@ void CPU::execute_cycle(Memory& memory, Display& display, Input& keys) {
             switch (opcode & 0x00FF) {
                 case 0x0007: OP_Fx07(opcode); break;
                 case 0x000A: OP_Fx0A(opcode, keys); break;
-                // case 0x000A: OP_Fx0A(opcode); break;
                 case 0x0015: OP_Fx15(opcode); break;
                 case 0x0018: OP_Fx18(opcode); break;
                 case 0x001E: OP_Fx1E(opcode); break;
@@ -121,7 +110,6 @@ void CPU::update_timers() {
 
 void CPU::OP_00E0(Display& display) {
     display.clear();
-    // PC += 2;
 }
 
 void CPU::OP_00EE() {
@@ -147,70 +135,56 @@ void CPU::OP_3xkk(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t kk = opcode & 0x00FF;
     if (V[Vx] == kk) {
-        // PC += 4;
         PC += 2;
     } 
-    // else PC += 2;
 }
 
 void CPU::OP_4xkk(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t kk = opcode & 0x00FF;
     if (V[Vx] != kk) {
-        // PC += 4;
         PC += 2;
     }
-    // else PC += 2;
 }
 
 void CPU::OP_5xy0(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t Vy = (opcode & 0x00F0) >> 4;
     if (V[Vx] == V[Vy]) {
-        // PC += 4;
         PC += 2;
     } 
-    // else PC += 2;
 }
 
 void CPU::OP_6xkk(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t kk = opcode & 0x00FF;
     V[Vx] = kk;
-    // PC += 2;
 }
 
 void CPU::OP_7xkk(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t kk = opcode & 0x00FF;
     V[Vx] += kk;
-    // PC += 2;
 }
 
 void CPU::OP_8xy0(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t Vy = (opcode & 0x00F0) >> 4;
-    // V[Vx] = Vy;
     V[Vx] = V[Vy];
-    // PC += 2;
 }
 
 void CPU::OP_8xy1(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t Vy = (opcode & 0x00F0) >> 4;
-    // V[Vx] |= Vy;
     V[Vx] = V[Vx] | V[Vy];
     V[0xF] = 0;
-    // PC += 2;
 }
 
 void CPU::OP_8xy2(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t Vy = (opcode & 0x00F0) >> 4;
-    // V[Vx] &= Vy;
     V[Vx] = V[Vx] & V[Vy];
     V[0xF] = 0;
-    // PC += 2;
 }
 
 void CPU::OP_8xy3(uint16_t opcode) {
@@ -218,7 +192,6 @@ void CPU::OP_8xy3(uint16_t opcode) {
     uint8_t Vy = (opcode & 0x00F0) >> 4;
     V[Vx] = V[Vx] ^ V[Vy];
     V[0xF] = 0;
-    // PC += 2;
 }
 
 void CPU::OP_8xy4(uint16_t opcode) {
@@ -232,7 +205,6 @@ void CPU::OP_8xy4(uint16_t opcode) {
     
     V[Vx] = sum & 0xFF; // Keep only the lower 8 bits
     V[0xF] = (sum > 0xFF) ? 1 : 0; // Set carry flag
-    // PC += 2;
 }
 
 void CPU::OP_8xy5(uint16_t opcode) {
@@ -246,19 +218,19 @@ void CPU::OP_8xy5(uint16_t opcode) {
     V[Vx] = original_Vx - original_Vy;
     // V[0xF] = (V[Vx] > V[Vy]) ? 1 : 0;
     // V[Vx] -= V[Vy];
-    // PC += 2;
 }
 
 void CPU::OP_8xy6(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
-    // uint8_t Vy = (opcode & 0x00F0) >> 4;
-    // uint8_t value = V[Vx];
+    uint8_t Vy = (opcode & 0x00F0) >> 4;
 
-    // V[0xF] = value & 0x1;
-    // V[Vx] = value >> 1;
-    V[0xF] = V[Vx] & 0x1; // Store LSB of Vx in VF
-    V[Vx] >>= 1; // Shift right by 1 (divide by 2)
-    // PC += 2;
+    // Original
+    // V[0xF] = V[Vx] & 0x1; // Store LSB of Vx in VF
+    // V[Vx] >>= 1; // Shift right by 1 (divide by 2)
+    
+    // Modern
+    V[0xF] = V[Vy] & 0x1;
+    V[Vx] = V[Vy] >> 1;
 }
 
 void CPU::OP_8xy7(uint16_t opcode) {
@@ -266,29 +238,31 @@ void CPU::OP_8xy7(uint16_t opcode) {
     uint8_t Vy = (opcode & 0x00F0) >> 4;
     V[Vx] = V[Vy] - V[Vx];
     V[0xF] = (V[Vy] > V[Vx]) ? 1 : 0;
-    // PC += 2;
 }
 
 void CPU::OP_8xyE(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
-    V[0xF] = (V[Vx] & 0x80) >> 7; // Store MSB of Vx in VF
-    V[Vx] <<= 1; // Shift left by 1 (multiply by 2)
-    // PC += 2;
+    uint8_t Vy = (opcode & 0x00F0) >> 4;
+
+    // Original
+    // V[0xF] = (V[Vx] & 0x80) >> 7; // Store MSB of Vx in VF
+    // V[Vx] <<= 1; // Shift left by 1 (multiply by 2)
+
+    // Modern
+    V[0xF] = (V[Vy] & 0x80) >> 7;
+    V[Vx] = V[Vy] << 1;
 }
 
 void CPU::OP_9xy0(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t Vy = (opcode & 0x00F0) >> 4;
     if (V[Vx] != V[Vy]) {
-        // PC += 4;
         PC += 2;
     } 
-    // else PC += 2;
 }
 
 void CPU::OP_Annn(uint16_t opcode) {
     I = opcode & 0x0FFF;
-    // PC += 2;
 }
 
 void CPU::OP_Bnnn(uint16_t opcode) {
@@ -300,7 +274,6 @@ void CPU::OP_Cxkk(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t kk = opcode & 0x00FF;
     V[Vx] = (rand() % 256) & kk;
-    // PC += 2;
 }
 
 void CPU::OP_Dxyn(Memory& memory, Display& display, uint16_t opcode) {
@@ -310,8 +283,6 @@ void CPU::OP_Dxyn(Memory& memory, Display& display, uint16_t opcode) {
     
     uint8_t x = V[Vx] % 64;
     uint8_t y = V[Vy] % 32;
-    // std::cout << "DRAW: x=" << (int)x << " y=" << (int)y << " height=" << (int)height 
-    //           << " I=0x" << std::hex << I << std::endl; // DEBUG
     
     V[0xF] = 0;  // Reset collision flag
 
@@ -332,83 +303,56 @@ void CPU::OP_Dxyn(Memory& memory, Display& display, uint16_t opcode) {
         }
     }
     display.set_draw_flag();
-    // PC += 2;
 }
 
 void CPU::OP_Ex9E(uint16_t opcode, Input& keys) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     // Check if key is valid and pressed
     if (V[Vx] < 16 && keys.is_pressed(V[Vx])) {
-        // PC += 4;
         PC += 2;
     } 
-    // else PC += 2;
 }
 
 void CPU::OP_ExA1(uint16_t opcode, Input& keys) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
-    // Check if key is valid and not pressed
     if (V[Vx] < 16 && !keys.is_pressed(V[Vx])) {
-        // PC += 4;
         PC += 2;
     } 
-    // else PC += 2;
 }
 
 void CPU::OP_Fx07(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     V[Vx] = delay_timer;
-    // PC += 2;
 }
 
 void CPU::OP_Fx0A(uint16_t opcode, Input& keys) {
-// void CPU::OP_Fx0A(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
-    // bool any_key_pressed = false;
-    // for (int i = 0; i < 16; i++) {
-    //     if (keys.is_pressed(i)) {
-    //         any_key_pressed = true;
-    //         break;
-    //     }
-    // }
     keys.reset();
     waiting_for_key = true;
     key_register = Vx;
     PC -= 2; // Stay on this instruction until a key is pressed
-    // for (uint8_t i = 0; i < 16; i++) {
-    //     if (keys.is_pressed(i)) {
-    //         V[Vx] = i;
-    //         // PC += 2;
-    //         return;
-    //     }
-    // }
-    std::cout << "=== ENTERING WAIT STATE ===" << std::endl;
     // If no key is pressed, do not advance the PC
 }
 
 void CPU::OP_Fx15(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     delay_timer = V[Vx];
-    // PC += 2;
 }
 
 void CPU::OP_Fx18(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     sound_timer = V[Vx];
-    // PC += 2;
 }
 
 void CPU::OP_Fx1E(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     I = (I + V[Vx]) & 0x0FFF; // I stays within 12 bits
-    // PC += 2;
 }
 
 void CPU::OP_Fx29(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t character = V[Vx] & 0x0F; // Only 0-F are valid characters
     I = character * 5; // Each character is 5 bytes
-    // PC += 2;
 }
 
 void CPU::OP_Fx33(uint16_t opcode, Memory& memory) {
@@ -416,7 +360,6 @@ void CPU::OP_Fx33(uint16_t opcode, Memory& memory) {
     memory.write(I, V[Vx] / 100);
     memory.write(I + 1, (V[Vx] / 10) % 10);
     memory.write(I + 2, V[Vx] % 10);
-    // PC += 2;
 }
 
 void CPU::OP_Fx55(uint16_t opcode, Memory& memory) {
@@ -425,7 +368,6 @@ void CPU::OP_Fx55(uint16_t opcode, Memory& memory) {
         memory.write(I + i, V[i]);
     }
     I += Vx + 1;
-    // PC += 2;
 }
 
 void CPU::OP_Fx65(uint16_t opcode, Memory& memory) {
@@ -434,7 +376,6 @@ void CPU::OP_Fx65(uint16_t opcode, Memory& memory) {
         V[i] = memory.read(I + i);
     }
     I += Vx + 1;
-    // PC += 2;
 }
 
 uint8_t CPU::get_sound_timer() const {
@@ -470,6 +411,5 @@ void CPU::handle_key_press(uint8_t key) {
         V[key_register] = key;
         waiting_for_key = false;
         PC += 2;  // Advance to next instruction
-        std::cout << "=== EXITING WAIT STATE ===" << std::endl;
     }
 }

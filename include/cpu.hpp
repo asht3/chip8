@@ -61,16 +61,10 @@ class CPU {
         void reset();
         void execute_cycle(Memory& memory, Display& display, Input& keys);
         void update_timers();
-        // void set_delay_timer(uint8_t value);
-        // uint8_t get_delay_timer() const;
-        // void set_sound_timer(uint8_t value);
         uint8_t get_sound_timer() const;
         uint16_t get_pc() const;
         void set_pc(uint16_t address);
         void add_to_pc(uint16_t offset);
-        // uint16_t get_I() const;
-        // void set_I(uint16_t address);
-        // uint8_t get_V(uint8_t index) const;
         void set_V(uint8_t index, uint8_t value);
         void push_stack(uint16_t address);
         uint16_t pop_stack();
