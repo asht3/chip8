@@ -23,6 +23,8 @@ The emulator was tested using test ROMs from this [Chip-8 test suite](https://gi
 
 Game ROMs used in this project are from the [Chip-8 archive](https://johnearnest.github.io/chip8Archive/?sort=platform) and a [repo with a selection of games](https://github.com/kripod/chip8-roms).
 
+Implementation Note: This implementation uses the original behavior for compatibility with games like Space Invaders. The [Chip-8 quirks test](https://github.com/Timendus/chip8-test-suite) checks for the modern behavior.
+
 ## How To Change ROMs
 Find src/main.cpp. At the beginning of the main loop, look for a line of code loading in a ROM. It will look something like this:
 ```
