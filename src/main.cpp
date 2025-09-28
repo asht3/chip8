@@ -8,7 +8,7 @@
 int main() {
     // Load Chip8 ROM
     Chip8 chip8;
-    chip8.load_rom("./roms/Space-invaders.ch8");
+    chip8.load_rom("./roms/tetris.rom");
     // chip8.load_rom("./roms/4-flags.ch8");
     // chip8.load_rom("./roms/5-quirks.ch8");
     // chip8.load_rom("./roms/6-keypad.ch8");
