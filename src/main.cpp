@@ -3,12 +3,11 @@
 #include "../include/input.hpp"
 #include "../include/sound.hpp"
 #include <thread>
-#include <iostream> // Debug
 
 int main() {
     // Load Chip8 ROM
     Chip8 chip8;
-    chip8.load_rom("./roms/tetris.rom");
+    chip8.load_rom("./roms/br8kout.ch8");
     // chip8.load_rom("./roms/4-flags.ch8");
     // chip8.load_rom("./roms/5-quirks.ch8");
     // chip8.load_rom("./roms/6-keypad.ch8");
@@ -48,7 +47,8 @@ int main() {
                 chip8.stop();
             } else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
                 chip8.stop();
-            } else {
+            } 
+            else {
                 if (event.type == SDL_KEYDOWN && chip8.get_cpu().is_waiting_for_key()) {
                     uint8_t chip8_key = 0xFF;
                     switch (event.key.keysym.sym) {

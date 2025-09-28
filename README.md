@@ -25,6 +25,8 @@ Game ROMs used in this project are from the [Chip-8 archive](https://johnearnest
 
 Implementation Note: This implementation uses the original behavior for compatibility with games like Space Invaders. The [Chip-8 quirks test](https://github.com/Timendus/chip8-test-suite) checks for the modern behavior.
 
+Games that are known to be compatible with this emulator are in the roms folder.
+
 ## How To Change ROMs
 Find src/main.cpp. At the beginning of the main loop, look for a line of code loading in a ROM. It will look something like this:
 ```
@@ -46,7 +48,6 @@ Clicking on the 'X' of the window will exit the emulator. You can also press the
 
 ## Known Bugs
 Need to fix flags indicated in the [flags-rom test](https://github.com/Timendus/chip8-test-suite). The ones with issues are 8xy5 (happy path & carry), 8xy6 (carry), and 8xyE (carry).
-
 
 ## References
 
