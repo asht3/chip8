@@ -37,7 +37,7 @@ You can change the name of the ROM to any of the roms in the roms folder. Or you
 ## Input
 SDL was used to implement the key mapping. The emulator uses a QWERTY keyboard for input. The keys are mapped below from left to right (1->1, 2->2, 3->3, C->4, etc):
 
-SDL Key     | QWERTY Key |
+QWERTY Key     | CHIP 8 Key |
 ----------- | ---------- |
 1 2 3 4     | 1 2 3 C    |
 Q W E R     | 4 5 6 D    |  
