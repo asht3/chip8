@@ -46,8 +46,13 @@ Z X C V     | A 0 B F    |
 
 Clicking on the 'X' of the window will exit the emulator. You can also press the ESC key on your keyboard.
 
-## Known Bugs
-Need to fix flags indicated in the [flags-rom test](https://github.com/Timendus/chip8-test-suite). The ones with issues are 8xy5 (happy path & carry), 8xy6 (carry), and 8xyE (carry).
+## Work In Progress
+Progress will be tracked here.
+- Investigating and fixing existing bugs
+- Updating documentation
+- Refactoring code
+- Improving test coverage
+- Working on compatibility with more roms
 
 ## References
 

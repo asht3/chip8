@@ -216,6 +216,7 @@ void CPU::OP_8xy5(uint16_t opcode) {
     // V[0xF] = (original_Vx > original_Vy) ? 1 : 0;
     V[0xF] = (original_Vx >= original_Vy) ? 1 : 0;
     V[Vx] = original_Vx - original_Vy;
+
     // V[0xF] = (V[Vx] > V[Vy]) ? 1 : 0;
     // V[Vx] -= V[Vy];
 }
