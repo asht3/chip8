@@ -214,8 +214,9 @@ void CPU::OP_8xy5(uint16_t opcode) {
     uint8_t original_Vy = V[Vy];
     
     // V[0xF] = (original_Vx > original_Vy) ? 1 : 0;
-    V[0xF] = (original_Vx >= original_Vy) ? 1 : 0;
+    
     V[Vx] = original_Vx - original_Vy;
+    V[0xF] = (original_Vx >= original_Vy) ? 1 : 0;
 
     // V[0xF] = (V[Vx] > V[Vy]) ? 1 : 0;
     // V[Vx] -= V[Vy];
@@ -226,8 +227,10 @@ void CPU::OP_8xy6(uint16_t opcode) {
     // uint8_t Vy = (opcode & 0x00F0) >> 4;
 
     // Original
-    V[0xF] = V[Vx] & 0x1; // Store LSB of Vx in VF
+    uint8_t temp = V[Vx] & 0x1;
+    // V[0xF] = V[Vx] & 0x1; // Store LSB of Vx in VF
     V[Vx] >>= 1; // Shift right by 1 (divide by 2)
+    V[0xF] = temp; 
     
     // Modern
     // V[0xF] = V[Vy] & 0x1;
@@ -246,8 +249,10 @@ void CPU::OP_8xyE(uint16_t opcode) {
     // uint8_t Vy = (opcode & 0x00F0) >> 4;
 
     // Original
-    V[0xF] = (V[Vx] & 0x80) >> 7; // Store MSB of Vx in VF
+    uint8_t temp = (V[Vx] & 0x80) >> 7;
     V[Vx] <<= 1; // Shift left by 1 (multiply by 2)
+    V[0xF] = temp; // Store MSB of Vx in VF
+    
 
     // Modern
     // V[0xF] = (V[Vy] & 0x80) >> 7;
