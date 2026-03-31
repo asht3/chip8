@@ -8,47 +8,38 @@ int main() {
     // Load Chip8 ROM
     Chip8 chip8;
     // chip8.load_rom("./roms/br8kout.ch8");
-    chip8.load_rom("./roms/4-flags.ch8");
-    // chip8.load_rom("./roms/5-quirks.ch8");
+    // chip8.load_rom("./roms/Tetris [Fran Dachille, 1991].ch8");
+
+    // chip8.load_rom("./roms/4-flags.ch8");
+    chip8.load_rom("./roms/5-quirks.ch8");
     // chip8.load_rom("./roms/6-keypad.ch8");
 
     chip8.get_display().init_sdl("CHIP-8", 10);
     
-    // Initialize sound
+    
     Sound sound;
     sound.init();
 
     // Start emulation
     chip8.run();
+    const int TARGET_FPS = 60;
+    const int CYCLES_PER_FRAME = 10;
+    const int FRAME_DURATION_MS = 1000 / TARGET_FPS;
     SDL_Event event;
 
     while (chip8.is_running()) {
-        if (!chip8.get_cpu().is_waiting_for_key()) {
-            chip8.emulate_cycle();
-        } else {
-            chip8.get_cpu().update_timers();
-        }
-
-        if (chip8.get_cpu().get_sound_timer() > 0) {
-            sound.beep();
-        } else {
-            sound.stop();
-        }
-        
-        if (chip8.get_display().needs_redraw()) {
-            chip8.get_display().render_to_sdl(10);
-            chip8.get_display().clear_redraw_flag();
-            // Delay to see display
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        }
-
+        auto frame_start = std::chrono::steady_clock::now();
+    
+        // Process input once per frame
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 chip8.stop();
             } else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
                 chip8.stop();
-            } 
-            else {
+            } else {
+                chip8.get_input().handle_input_sdl(event, chip8.get_input());
+                
+                // Handle key waiting state
                 if (event.type == SDL_KEYDOWN && chip8.get_cpu().is_waiting_for_key()) {
                     uint8_t chip8_key = 0xFF;
                     switch (event.key.keysym.sym) {
@@ -73,8 +64,32 @@ int main() {
                     if (chip8_key != 0xFF) {
                         chip8.get_cpu().handle_key_press(chip8_key);
                     }
-                } else chip8.get_input().handle_input_sdl(event, chip8.get_input());
+                }
             }
+        }
+        
+        // Run multiple CPU cycles for this frame
+        for (int cycle = 0; cycle < CYCLES_PER_FRAME; cycle++) {
+            chip8.emulate_cycle();
+        }
+        
+        if (chip8.get_cpu().get_sound_timer() > 0) {
+            sound.beep();
+        } else {
+            sound.stop();
+        }
+        
+        if (chip8.get_display().needs_redraw()) {
+            chip8.get_display().render_to_sdl(10);
+            chip8.get_display().clear_redraw_flag();
+        }
+        
+        // Frame rate limiting (60 FPS)
+        auto frame_end = std::chrono::steady_clock::now();
+        auto frame_duration = std::chrono::duration_cast<std::chrono::milliseconds>(frame_end - frame_start);
+        
+        if (frame_duration.count() < FRAME_DURATION_MS) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(FRAME_DURATION_MS - frame_duration.count()));
         }
     }
 
