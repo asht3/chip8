@@ -2,6 +2,7 @@
 #include "memory.hpp"
 #include "cpu.hpp"
 #include "input.hpp"
+#include "sound.hpp"
 
 class Chip8 {
     private:
@@ -10,6 +11,7 @@ class Chip8 {
         Display display;
         Input input;
         bool running;
+        Sound* sound = nullptr;
 
     public:
         Chip8();
@@ -22,4 +24,5 @@ class Chip8 {
         Input& get_input();
         bool is_running();
         CPU& get_cpu();
+        void set_sound(Sound* snd);
 };

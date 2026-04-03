@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 #include <SDL2/SDL.h>
+#include <chrono>
+#include <thread>
 
 class Display {
     private:
@@ -10,6 +12,9 @@ class Display {
         bool draw_flag;
         SDL_Window* window = nullptr;
         SDL_Renderer* renderer = nullptr;
+
+            bool vblank_enabled = true;
+    std::chrono::steady_clock::time_point last_vblank_time;
 
     public:
         Display();
@@ -22,6 +27,8 @@ class Display {
         void flip_pixel(uint8_t x, uint8_t y);
         bool needs_redraw();
         void clear_redraw_flag();
+        void wait_for_vblank();
+        void enable_vblank(bool enable);
 
         // For SDL rendering
         void init_sdl(const char* title, int scale);

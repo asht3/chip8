@@ -34,14 +34,23 @@ bool Display::draw_sprite(uint8_t x, uint8_t y, uint8_t* sprite, uint8_t height)
 }
 
 bool Display::get_pixel(uint8_t x, uint8_t y) const {
+    // if (x >= WIDTH || y >= HEIGHT) {
+    //     return false;
+    // }
     return pixels[x + y * WIDTH];
 }
 
 void Display::set_pixel(uint8_t x, uint8_t y, bool value) {
+    // if (x >= WIDTH || y >= HEIGHT) {
+    //     return;
+    // }
     pixels[x + y * WIDTH] = value;
 }
 
 bool Display::xor_pixel(uint8_t x, uint8_t y) {
+    // if (x >= WIDTH || y >= HEIGHT) {
+    //     return false;
+    // }
     int index = x + y * WIDTH;
     bool old_value = pixels[index];
     pixels[index] = pixels[index] ^ true;  // XOR with 1
@@ -49,6 +58,9 @@ bool Display::xor_pixel(uint8_t x, uint8_t y) {
 }
 
 void Display::flip_pixel(uint8_t x, uint8_t y) {
+    // if (x >= WIDTH || y >= HEIGHT) {
+    //     return;
+    // }
     pixels[x + y * WIDTH] = !pixels[x + y * WIDTH];
 }
 
@@ -58,6 +70,41 @@ bool Display::needs_redraw() {
 
 void Display::clear_redraw_flag() {
     draw_flag = false;
+}
+
+void Display::wait_for_vblank() {
+    if (!vblank_enabled) return;
+    
+    static int call_count = 0;
+    call_count++;
+    
+    static auto last_print = std::chrono::steady_clock::now();
+    auto now = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - last_print);
+    
+    if (elapsed.count() >= 2) {
+        printf("wait_for_vblank called %d times in 2 seconds\n", call_count);
+        call_count = 0;
+        last_print = now;
+    }
+    
+    static auto last_draw = std::chrono::steady_clock::now();
+    auto time_since_last = std::chrono::duration_cast<std::chrono::microseconds>(now - last_draw);
+    
+    const int FRAME_US = 16666;
+    
+    if (time_since_last.count() < FRAME_US) {
+        std::this_thread::sleep_for(std::chrono::microseconds(FRAME_US - time_since_last.count()));
+    }
+    
+    last_draw = std::chrono::steady_clock::now();
+}
+
+void Display::enable_vblank(bool enable) {
+    vblank_enabled = enable;
+    if (enable) {
+        last_vblank_time = std::chrono::steady_clock::now();
+    }
 }
 
 void Display::init_sdl(const char* title = "CHIP-8", int scale = 10) {

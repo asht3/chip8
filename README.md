@@ -63,6 +63,8 @@ Progress will be tracked here.
 4. https://www.emulationonline.com/systems/chip8/control-flow-and-graphics/
 5. https://jordanemme.com/posts/writing-a-chip8-emulator/#the-display
 6. https://deepwiki.com/tavito/chip8/6-sdl-integration
+7. https://www.cs.columbia.edu/~sedwards/classes/2016/4840-spring/reports/Chip8.pdf
+8. https://www.laurencescotford.net/2020/07/19/chip-8-on-the-cosmac-vip-drawing-sprites/
 
 ### ROM Loading:
 1. https://codepal.ai/code-generator/query/vA7y78Lb/n64-rom-reading-emulation

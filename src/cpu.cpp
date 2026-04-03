@@ -219,10 +219,13 @@ void CPU::OP_8xy5(uint16_t opcode) {
 
 void CPU::OP_8xy6(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
+    uint8_t Vy = (opcode & 0x00F0) >> 4;
 
-    uint8_t temp = V[Vx] & 0x1;
+    uint8_t temp = V[Vy] & 0x1;
+    V[Vx] = V[Vy] >> 1; // Shift Vy into Vx
+    // uint8_t temp = V[Vx] & 0x1;
     // V[0xF] = V[Vx] & 0x1; // Store LSB of Vx in VF
-    V[Vx] >>= 1; // Shift right by 1 (divide by 2)
+    // V[Vx] >>= 1; // Shift right by 1 (divide by 2)
     V[0xF] = temp; 
 }
 
@@ -235,9 +238,12 @@ void CPU::OP_8xy7(uint16_t opcode) {
 
 void CPU::OP_8xyE(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
+    uint8_t Vy = (opcode & 0x00F0) >> 4;
 
-    uint8_t temp = (V[Vx] & 0x80) >> 7;
-    V[Vx] <<= 1; // Shift left by 1 (multiply by 2)
+    uint8_t temp = (V[Vy] & 0x80) >> 7;
+    V[Vx] = V[Vy] << 1; // Shift Vy into Vx
+    // uint8_t temp = (V[Vx] & 0x80) >> 7;
+    // V[Vx] <<= 1; // Shift left by 1 (multiply by 2)
     V[0xF] = temp; // Store MSB of Vx in VF
 }
 
@@ -265,34 +271,86 @@ void CPU::OP_Cxkk(uint16_t opcode) {
 }
 
 void CPU::OP_Dxyn(Memory& memory, Display& display, uint16_t opcode) {
+    display.wait_for_vblank();
+    
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t Vy = (opcode & 0x00F0) >> 4;
     uint8_t height = opcode & 0x000F;
     
-    uint8_t x = V[Vx] % 64;
-    uint8_t y = V[Vy] % 32;
+    // Step 1: Apply modulo to starting coordinates (wrap them into screen bounds)
+    int x = V[Vx] % 64;   // Or V[Vx] & 63 for faster modulo
+    int y = V[Vy] % 32;   // Or V[Vy] & 31
     
     V[0xF] = 0;  // Reset collision flag
 
+    // Step 2: Draw sprite with clipping (no wrapping of individual pixels)
     for (int row = 0; row < height; row++) {
         uint8_t sprite_byte = memory.read(I + row);
         
+        // Calculate actual Y position
+        int pixel_y = y + row;
+        
+        // Clip: Stop if we reach the bottom edge of the screen
+        if (pixel_y >= 32) {
+            break;  // Stop drawing this sprite entirely
+        }
+        if (pixel_y < 0) {
+            continue;  // Skip this row (shouldn't happen with modulo start)
+        }
+        
         for (int col = 0; col < 8; col++) {
             if ((sprite_byte & (0x80 >> col)) != 0) {
-                uint8_t pixel_x = (x + col) % 64;
-                uint8_t pixel_y = (y + row) % 32;
-                // Check if pixel is currently set
-                if (display.get_pixel(pixel_x, pixel_y)) {
-                    V[0xF] = 1;  // Collision detected
+                int pixel_x = x + col;
+                
+                // Clip: If we reach the right edge, stop drawing this row
+                if (pixel_x >= 64) {
+                    break;  // Stop this row (don't continue to next column)
+                }
+                if (pixel_x < 0) {
+                    continue;  // Skip this pixel (shouldn't happen with modulo start)
                 }
                 
+                // Check collision
+                if (display.get_pixel(pixel_x, pixel_y)) {
+                    V[0xF] = 1;
+                }
+                
+                // Flip the pixel
                 display.flip_pixel(pixel_x, pixel_y);
             }
         }
     }
     display.set_draw_flag();
-    // display.wait_for_vblank();
 }
+
+// void CPU::OP_Dxyn(Memory& memory, Display& display, uint16_t opcode) {
+//     uint8_t Vx = (opcode & 0x0F00) >> 8;
+//     uint8_t Vy = (opcode & 0x00F0) >> 4;
+//     uint8_t height = opcode & 0x000F;
+    
+//     uint8_t x = V[Vx] % 64;
+//     uint8_t y = V[Vy] % 32;
+    
+//     V[0xF] = 0;  // Reset collision flag
+
+//     for (int row = 0; row < height; row++) {
+//         uint8_t sprite_byte = memory.read(I + row);
+        
+//         for (int col = 0; col < 8; col++) {
+//             if ((sprite_byte & (0x80 >> col)) != 0) {
+//                 uint8_t pixel_x = (x + col) % 64;
+//                 uint8_t pixel_y = (y + row) % 32;
+//                 // Check if pixel is currently set
+//                 if (display.get_pixel(pixel_x, pixel_y)) {
+//                     V[0xF] = 1;  // Collision detected
+//                 }
+                
+//                 display.flip_pixel(pixel_x, pixel_y);
+//             }
+//         }
+//     }
+//     display.set_draw_flag();
+// }
 
 void CPU::OP_Ex9E(uint16_t opcode, Input& keys) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
