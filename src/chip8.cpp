@@ -5,6 +5,8 @@
 #include "../include/input.hpp"
 #include <exception>
 #include <iostream> // For debugging output
+#include <chrono>
+#include <thread>
 
 Chip8::Chip8() {
     reset();
@@ -110,16 +112,25 @@ void Chip8::run() {
     running = true;
     SDL_Event event;
     
-    // Enable VBlank waiting for the test
-    display.enable_vblank(true);
+    // Frame-based loop at 60 FPS
+    const int TARGET_FPS = 60;
+    const int CYCLES_PER_FRAME = 15;  // Adjusted for better timing
+    const auto FRAME_DURATION = std::chrono::nanoseconds(1000000000 / TARGET_FPS);  // 16,666,667 ns
+    
+    auto next_frame_time = std::chrono::steady_clock::now();
     
     while (running) {
+        // Set vblank ready at start of each frame
+        display.set_vblank();
+        
         // Process input
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 running = false;
+                break;
             } else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
                 running = false;
+                break;
             } else {
                 input.handle_input_sdl(event, input);
                 
@@ -152,14 +163,24 @@ void Chip8::run() {
             }
         }
         
-        // Run ONE CPU cycle at a time (no fixed frame rate)
-        // The VBlank wait in DXYN will control the timing
-        if (cpu.is_waiting_for_key()) {
-            cpu.update_timers();
-        } else {
-            cpu.execute_cycle(memory, display, input);
-            cpu.update_timers();
+        if (!running) break;
+
+        // Run up to CYCLES_PER_FRAME cycles, stopping early if a draw blocks
+        for (int cycle = 0; cycle < CYCLES_PER_FRAME; cycle++) {
+            if (cpu.is_waiting_for_key()) {
+                // Don't execute cycles when waiting for key
+                break;
+            } else {
+                cpu.execute_cycle(memory, display, input);
+                // Stop if this cycle caused a draw that blocked the frame
+                if (display.is_frame_blocked()) {
+                    break;
+                }
+            }
         }
+        
+        // Update timers once per frame at 60 Hz
+        cpu.update_timers();
         
         // Handle sound
         if (cpu.get_sound_timer() > 0) {
@@ -168,12 +189,15 @@ void Chip8::run() {
             sound->stop();
         }
         
-        // Render only when needed (VBlank will limit draw frequency)
+        // Render only when needed
         if (display.needs_redraw()) {
             display.render_to_sdl(10);
             display.clear_redraw_flag();
         }
         
+        // Sleep until next 60Hz tick using sleep_until with fixed-interval clock
+        next_frame_time += FRAME_DURATION;
+        std::this_thread::sleep_until(next_frame_time);
     }
 }
 

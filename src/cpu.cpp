@@ -271,7 +271,11 @@ void CPU::OP_Cxkk(uint16_t opcode) {
 }
 
 void CPU::OP_Dxyn(Memory& memory, Display& display, uint16_t opcode) {
-    display.wait_for_vblank();
+    if (!display.consume_vblank()) {
+        // Not yet vblank time, back up PC to retry next frame
+        PC -= 2;
+        return;
+    }
     
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t Vy = (opcode & 0x00F0) >> 4;
