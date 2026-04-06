@@ -14,7 +14,7 @@ class Display {
         SDL_Renderer* renderer = nullptr;
 
         bool vblank_ready = false;
-        bool frame_blocked = false;
+        bool frame_blocked = false; // Prevents multiple draws per frame
 
     public:
         Display();
