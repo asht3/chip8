@@ -10,10 +10,10 @@
 int main() {
     // Load Chip8 ROM
     Chip8 chip8;
-    // chip8.load_rom("./roms/br8kout.ch8");
+    chip8.load_rom("./roms/br8kout.ch8");
     // chip8.load_rom("./roms/Tetris [Fran Dachille, 1991].ch8");
     // chip8.load_rom("./roms/Space Invaders [David Winter].ch8");
-    chip8.load_rom("./roms/Pong (1 player).ch8");
+    // chip8.load_rom("./roms/Pong (1 player).ch8");
 
     // chip8.load_rom("./roms/4-flags.ch8");
     // chip8.load_rom("./roms/5-quirks.ch8");

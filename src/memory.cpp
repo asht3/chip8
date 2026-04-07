@@ -33,6 +33,7 @@ uint8_t Memory::read(uint16_t address) const {
         throw std::out_of_range("Memory read out of bounds");
     }
     return memory[address];
+    // return memory[address & 0xFFF];
 }
 
 void Memory::write(uint16_t address, uint8_t value) {
@@ -40,6 +41,7 @@ void Memory::write(uint16_t address, uint8_t value) {
         throw std::out_of_range("Memory write out of bounds");
     }
     memory[address] = value;
+    // memory[address & 0xFFF] = value;
 }
 void Memory::load_rom(const std::string& filename, uint16_t start_address) {
     // std::cout << "Opening: " << filename << std::endl;
@@ -72,14 +74,6 @@ void Memory::load_rom(const std::string& filename, uint16_t start_address) {
                                std::to_string(bytes_read) + " of " + 
                                std::to_string(file_size));
     }
-    
-    // Verify the load
-    // std::cout << "First 32 bytes of ROM:" << std::endl;
-    // for (int i = 0; i < 32; i++) {
-    //     std::cout << std::hex << std::setw(2) << std::setfill('0') 
-    //               << static_cast<int>(memory[start_address + i]) << " ";
-    //     if (i % 16 == 15) std::cout << std::endl;
-    // }
 }
 
 void Memory::load_fontset() {
@@ -102,8 +96,9 @@ void Memory::load_fontset() {
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
 
-    // Start loading fontset at memory location 0x50 (80)
+    // Start loading fontset at memory location 0x50 (80 bytes)
     for (unsigned int i = 0; i < FONTSET_SIZE; ++i) {
         memory[0x50 + i] = fontset[i];
+        // memory[i] = fontset[i];
     }
 }

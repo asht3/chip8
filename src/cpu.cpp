@@ -1,6 +1,7 @@
 #include "../include/cpu.hpp"
 #include <algorithm>
 #include <stdexcept>
+#include <iostream> // debug
 
 CPU::CPU() {
     reset();
@@ -95,7 +96,6 @@ void CPU::execute_cycle(Memory& memory, Display& display, Input& keys) {
         default: throw std::runtime_error("Unknown opcode: " + std::to_string(opcode));
     }
 }
-
 
 uint16_t CPU::fetch_opcode(Memory& memory) {
     return (memory.read(PC) << 8) | memory.read(PC + 1);
@@ -227,8 +227,14 @@ void CPU::OP_8xy6(uint16_t opcode) {
 void CPU::OP_8xy7(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t Vy = (opcode & 0x00F0) >> 4;
-    V[Vx] = V[Vy] - V[Vx];
-    V[0xF] = (V[Vy] > V[Vx]) ? 1 : 0;
+
+    uint8_t original_Vx = V[Vx];
+    uint8_t original_Vy = V[Vy];
+    
+    V[Vx] = original_Vy - original_Vx;
+    V[0xF] = (original_Vy >= original_Vx) ? 1 : 0;
+    // V[Vx] = V[Vy] - V[Vx];
+    // V[0xF] = (V[Vy] > V[Vx]) ? 1 : 0;
 }
 
 void CPU::OP_8xyE(uint16_t opcode) {
@@ -263,6 +269,61 @@ void CPU::OP_Cxkk(uint16_t opcode) {
     V[Vx] = (rand() % 256) & kk;
 }
 
+// void CPU::OP_Dxyn(Memory& memory, Display& display, uint16_t opcode) {
+//     // Checks for a drawing "token"
+//     if (!display.consume_vblank()) {
+//         PC -= 2; // Back up PC to retry next frame
+//         return;
+//     }
+    
+//     uint8_t Vx = (opcode & 0x0F00) >> 8;
+//     uint8_t Vy = (opcode & 0x00F0) >> 4;
+//     uint8_t height = opcode & 0x000F;
+    
+//     int x = V[Vx] % 64;
+//     int y = V[Vy] % 32;
+    
+//     V[0xF] = 0; // Reset collision flag
+
+//     // Draw sprite with clipping
+//     for (int row = 0; row < height; row++) {
+//         uint8_t sprite_byte = memory.read(I + row);
+        
+//         // Calculate Y position
+//         int pixel_y = y + row;
+        
+//         // Stop draw if bottom edge of the screen is reached
+//         if (pixel_y >= 32) {
+//             break;
+//         }
+//         if (pixel_y < 0) {
+//             continue;
+//         }
+        
+//         for (int col = 0; col < 8; col++) {
+//             if ((sprite_byte & (0x80 >> col)) != 0) {
+//                 int pixel_x = x + col;
+                
+//                 // Stop drawing this row when right edge is reached
+//                 if (pixel_x >= 64) {
+//                     break;
+//                 }
+//                 if (pixel_x < 0) {
+//                     continue;
+//                 }
+                
+//                 // Check collision
+//                 if (display.get_pixel(pixel_x, pixel_y)) {
+//                     V[0xF] = 1;
+//                 }
+                
+//                 display.flip_pixel(pixel_x, pixel_y);
+//             }
+//         }
+//     }
+//     display.set_draw_flag();
+// }
+
 void CPU::OP_Dxyn(Memory& memory, Display& display, uint16_t opcode) {
     // Checks for a drawing "token"
     if (!display.consume_vblank()) {
@@ -273,49 +334,25 @@ void CPU::OP_Dxyn(Memory& memory, Display& display, uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t Vy = (opcode & 0x00F0) >> 4;
     uint8_t height = opcode & 0x000F;
-    
-    int x = V[Vx] % 64;
-    int y = V[Vy] % 32;
-    
-    V[0xF] = 0; // Reset collision flag
 
-    // Draw sprite with clipping
-    for (int row = 0; row < height; row++) {
-        uint8_t sprite_byte = memory.read(I + row);
-        
-        // Calculate Y position
-        int pixel_y = y + row;
-        
-        // Stop draw if bottom edge of the screen is reached
-        if (pixel_y >= 32) {
-            break;
-        }
-        if (pixel_y < 0) {
-            continue;
-        }
-        
-        for (int col = 0; col < 8; col++) {
-            if ((sprite_byte & (0x80 >> col)) != 0) {
-                int pixel_x = x + col;
-                
-                // Stop drawing this row when right edge is reached
-                if (pixel_x >= 64) {
-                    break;
-                }
-                if (pixel_x < 0) {
-                    continue;
-                }
-                
-                // Check collision
-                if (display.get_pixel(pixel_x, pixel_y)) {
-                    V[0xF] = 1;
-                }
-                
-                display.flip_pixel(pixel_x, pixel_y);
-            }
-        }
+    std::cout << "I = " << I << ", height = " << (int)height << std::endl;
+    
+    uint8_t x = V[Vx];
+    uint8_t y = V[Vy];
+    
+    // Build sprite data from memory
+    uint8_t sprite[16]; // Max height is 15
+    for (int i = 0; i < height; i++) {
+        sprite[i] = memory.read(I + i);
     }
-    display.set_draw_flag();
+    
+    bool collision = display.draw_sprite(x, y, sprite, height);
+
+    std::cout << "Collision: " << (collision ? "YES" : "NO") << std::endl;
+    
+    V[0xF] = collision ? 1 : 0;
+
+    std::cout << "VF = " << (int)V[0xF] << std::endl;
 }
 
 void CPU::OP_Ex9E(uint16_t opcode, Input& keys) {
