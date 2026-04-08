@@ -5,16 +5,14 @@
 
 int main() {
     Chip8 chip8;
-    // chip8.load_rom("./roms/Breakout [Carmelo Cortez, 1979].ch8");
-    // chip8.load_rom("./roms/Tetris [Fran Dachille, 1991].ch8");
-    // chip8.load_rom("./roms/Space Invaders [David Winter].ch8");
+    // chip8.load_rom("./roms/Breakout (Brix hack) [David Winter, 1997].ch8");
     // chip8.load_rom("./roms/Pong (1 player).ch8");
-    chip8.load_rom("./roms/2-ibm-logo.ch8");
+    // chip8.load_rom("./roms/2-ibm-logo.ch8");
 
     // chip8.load_rom("./roms/4-flags.ch8");
     // chip8.load_rom("./roms/5-quirks.ch8");
     // chip8.load_rom("./roms/3-corax+.ch8");
-    // chip8.load_rom("./roms/6-keypad.ch8");
+    chip8.load_rom("./roms/6-keypad.ch8");
 
     chip8.get_display().init_sdl("CHIP-8", 10);
     

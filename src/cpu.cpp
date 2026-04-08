@@ -38,16 +38,15 @@ void CPU::execute_cycle(Memory& memory, Display& display, Input& keys) {
     // static std::string last_mnemonic = "";
     
     int16_t opcode = fetch_opcode(memory);
-    // std::string current_mnemonic = get_mnemonic_simple(opcode);
+    // std::string current_mnemonic = Debugger::get_mnemonic_simple(opcode);
     
-    // // Only print every few instructions to avoid overwhelming terminal
+    // // Print every few instructions
     // static int print_counter = 0;
     // if (++print_counter >= 1) {  // Print every instruction (change to 10 for less frequent)
-    //     print_debug(PC, opcode, I, V, last_mnemonic, current_mnemonic);
+    //     Debugger::print_debug(PC, opcode, I, V, last_mnemonic, current_mnemonic);
     //     print_counter = 0;
     // }
 
-    // uint16_t opcode = fetch_opcode(memory);
     PC += 2; // Move to next instruction
 
     switch (opcode & 0xF000) {
@@ -362,7 +361,7 @@ void CPU::OP_Fx1E(uint16_t opcode) {
 void CPU::OP_Fx29(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t character = V[Vx] & 0x0F; // Only 0-F are valid characters
-    I = character * 5; // Each character is 5 bytes
+    I = 0x50 + (character * 5); // Each character is 5 bytes
     // std::cout << "Fx29: Loading font for character " << (int)character 
     //           << " at I=" << I << std::endl;
 }
