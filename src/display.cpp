@@ -15,24 +15,6 @@ void Display::set_draw_flag() {
     draw_flag = true;
 }
 
-// bool Display::draw_sprite(uint8_t x, uint8_t y, uint8_t* sprite, uint8_t height) {
-//     bool collision = false;
-//     for (int row = 0; row < height; row++) {
-//         uint8_t sprite_row = sprite[row];
-//         for (int col = 0; col < 8; col++) {
-//             if ((sprite_row & (0x80 >> col)) != 0) { // Check if the bit is set
-//                 int px = (x + col) % WIDTH;
-//                 int py = (y + row) % HEIGHT;
-//                 if (xor_pixel(px, py)) {
-//                     collision = true; // Collision detected
-//                 }
-//             }
-//         }
-//     }
-//     draw_flag = true;
-//     return collision;
-// }
-
 bool Display::draw_sprite(uint8_t x, uint8_t y, uint8_t* sprite, uint8_t height) {
     bool collision = false;
     
@@ -99,8 +81,9 @@ bool Display::xor_pixel(uint8_t x, uint8_t y) {
     bool old_value = pixels[index];
     // pixels[index] = pixels[index] ^ true;  // XOR with 1
     // return old_value && !pixels[index];    // Collision if was on and now off
-    pixels[index] = !pixels[index];
-    return old_value;
+    bool new_value = !old_value;
+    pixels[index] = new_value;
+    return (old_value == true && new_value == false);
 }
 
 void Display::flip_pixel(uint8_t x, uint8_t y) {

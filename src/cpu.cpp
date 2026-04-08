@@ -35,7 +35,19 @@ uint16_t CPU::pop_stack() {
 
 // Fetch, decode, and execute opcode
 void CPU::execute_cycle(Memory& memory, Display& display, Input& keys) {
-    uint16_t opcode = fetch_opcode(memory);
+    // static std::string last_mnemonic = "";
+    
+    int16_t opcode = fetch_opcode(memory);
+    // std::string current_mnemonic = get_mnemonic_simple(opcode);
+    
+    // // Only print every few instructions to avoid overwhelming terminal
+    // static int print_counter = 0;
+    // if (++print_counter >= 1) {  // Print every instruction (change to 10 for less frequent)
+    //     print_debug(PC, opcode, I, V, last_mnemonic, current_mnemonic);
+    //     print_counter = 0;
+    // }
+
+    // uint16_t opcode = fetch_opcode(memory);
     PC += 2; // Move to next instruction
 
     switch (opcode & 0xF000) {
@@ -221,7 +233,9 @@ void CPU::OP_8xy6(uint16_t opcode) {
 
     uint8_t temp = V[Vy] & 0x1;
     V[Vx] = V[Vy] >> 1; // Shift Vy into Vx
-    V[0xF] = temp; 
+    V[0xF] = temp;
+    // V[0xF] = V[Vx] & 0x1;
+    // V[Vx] >>= 1; 
 }
 
 void CPU::OP_8xy7(uint16_t opcode) {
@@ -233,8 +247,6 @@ void CPU::OP_8xy7(uint16_t opcode) {
     
     V[Vx] = original_Vy - original_Vx;
     V[0xF] = (original_Vy >= original_Vx) ? 1 : 0;
-    // V[Vx] = V[Vy] - V[Vx];
-    // V[0xF] = (V[Vy] > V[Vx]) ? 1 : 0;
 }
 
 void CPU::OP_8xyE(uint16_t opcode) {
@@ -244,6 +256,9 @@ void CPU::OP_8xyE(uint16_t opcode) {
     uint8_t temp = (V[Vy] & 0x80) >> 7;
     V[Vx] = V[Vy] << 1; // Shift Vy into Vx
     V[0xF] = temp; // Store MSB of Vx in VF
+
+    // V[0xF] = (V[Vx] & 0x80) >> 7;
+    // V[Vx] <<= 1;
 }
 
 void CPU::OP_9xy0(uint16_t opcode) {
@@ -269,61 +284,6 @@ void CPU::OP_Cxkk(uint16_t opcode) {
     V[Vx] = (rand() % 256) & kk;
 }
 
-// void CPU::OP_Dxyn(Memory& memory, Display& display, uint16_t opcode) {
-//     // Checks for a drawing "token"
-//     if (!display.consume_vblank()) {
-//         PC -= 2; // Back up PC to retry next frame
-//         return;
-//     }
-    
-//     uint8_t Vx = (opcode & 0x0F00) >> 8;
-//     uint8_t Vy = (opcode & 0x00F0) >> 4;
-//     uint8_t height = opcode & 0x000F;
-    
-//     int x = V[Vx] % 64;
-//     int y = V[Vy] % 32;
-    
-//     V[0xF] = 0; // Reset collision flag
-
-//     // Draw sprite with clipping
-//     for (int row = 0; row < height; row++) {
-//         uint8_t sprite_byte = memory.read(I + row);
-        
-//         // Calculate Y position
-//         int pixel_y = y + row;
-        
-//         // Stop draw if bottom edge of the screen is reached
-//         if (pixel_y >= 32) {
-//             break;
-//         }
-//         if (pixel_y < 0) {
-//             continue;
-//         }
-        
-//         for (int col = 0; col < 8; col++) {
-//             if ((sprite_byte & (0x80 >> col)) != 0) {
-//                 int pixel_x = x + col;
-                
-//                 // Stop drawing this row when right edge is reached
-//                 if (pixel_x >= 64) {
-//                     break;
-//                 }
-//                 if (pixel_x < 0) {
-//                     continue;
-//                 }
-                
-//                 // Check collision
-//                 if (display.get_pixel(pixel_x, pixel_y)) {
-//                     V[0xF] = 1;
-//                 }
-                
-//                 display.flip_pixel(pixel_x, pixel_y);
-//             }
-//         }
-//     }
-//     display.set_draw_flag();
-// }
-
 void CPU::OP_Dxyn(Memory& memory, Display& display, uint16_t opcode) {
     // Checks for a drawing "token"
     if (!display.consume_vblank()) {
@@ -334,8 +294,8 @@ void CPU::OP_Dxyn(Memory& memory, Display& display, uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t Vy = (opcode & 0x00F0) >> 4;
     uint8_t height = opcode & 0x000F;
-
-    std::cout << "I = " << I << ", height = " << (int)height << std::endl;
+    // std::cout << "Dxyn: Drawing at x=" << (int)Vx << ", y=" << (int)Vy 
+    //           << ", height=" << (int)height << ", I=" << I << std::endl;
     
     uint8_t x = V[Vx];
     uint8_t y = V[Vy];
@@ -348,11 +308,11 @@ void CPU::OP_Dxyn(Memory& memory, Display& display, uint16_t opcode) {
     
     bool collision = display.draw_sprite(x, y, sprite, height);
 
-    std::cout << "Collision: " << (collision ? "YES" : "NO") << std::endl;
+    // std::cout << "Collision: " << (collision ? "YES" : "NO") << std::endl;
     
     V[0xF] = collision ? 1 : 0;
 
-    std::cout << "VF = " << (int)V[0xF] << std::endl;
+    // std::cout << "VF = " << (int)V[0xF] << std::endl;
 }
 
 void CPU::OP_Ex9E(uint16_t opcode, Input& keys) {
@@ -403,6 +363,8 @@ void CPU::OP_Fx29(uint16_t opcode) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
     uint8_t character = V[Vx] & 0x0F; // Only 0-F are valid characters
     I = character * 5; // Each character is 5 bytes
+    // std::cout << "Fx29: Loading font for character " << (int)character 
+    //           << " at I=" << I << std::endl;
 }
 
 void CPU::OP_Fx33(uint16_t opcode, Memory& memory) {
@@ -418,6 +380,8 @@ void CPU::OP_Fx55(uint16_t opcode, Memory& memory) {
         memory.write(I + i, V[i]);
     }
     I += Vx + 1;
+    // std::cout << "Fx55: Storing V0-V" << (int)Vx 
+    //           << " to I=" << I << std::endl;
 }
 
 void CPU::OP_Fx65(uint16_t opcode, Memory& memory) {
