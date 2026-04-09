@@ -4,7 +4,7 @@
 #include "../include/display.hpp"
 #include "../include/input.hpp"
 #include <exception>
-#include <iostream> // For debugging output
+// #include <iostream> // For debugging output
 #include <chrono>
 #include <thread>
 
@@ -53,48 +53,16 @@ void Chip8::run() {
                 running = false;
                 break;
             } else {
-                input.handle_input_sdl(event, input);
-                
-                // Handle key waiting state
-                if (event.type == SDL_KEYDOWN && cpu.is_waiting_for_key()) {
-                    uint8_t chip8_key = 0xFF;
-                    switch (event.key.keysym.sym) {
-                        case SDLK_1: chip8_key = 0x1; break;
-                        case SDLK_2: chip8_key = 0x2; break;
-                        case SDLK_3: chip8_key = 0x3; break;
-                        case SDLK_4: chip8_key = 0xC; break;
-                        case SDLK_q: chip8_key = 0x4; break;
-                        case SDLK_w: chip8_key = 0x5; break;
-                        case SDLK_e: chip8_key = 0x6; break;
-                        case SDLK_r: chip8_key = 0xD; break;
-                        case SDLK_a: chip8_key = 0x7; break;
-                        case SDLK_s: chip8_key = 0x8; break;
-                        case SDLK_d: chip8_key = 0x9; break;
-                        case SDLK_f: chip8_key = 0xE; break;
-                        case SDLK_z: chip8_key = 0xA; break;
-                        case SDLK_x: chip8_key = 0x0; break;
-                        case SDLK_c: chip8_key = 0xB; break;
-                        case SDLK_v: chip8_key = 0xF; break;
-                    }
-                    
-                    if (chip8_key != 0xFF) {
-                        cpu.handle_key_press(chip8_key);
-                    }
-                }
+                input.handle_input_sdl(event);
             }
         }
         
         if (!running) break;
 
-        // Stop early if a draw blocked the frame
         for (int cycle = 0; cycle < CYCLES_PER_FRAME; cycle++) {
-            if (cpu.is_waiting_for_key()) {
+            cpu.execute_cycle(memory, display, input);
+            if (display.is_frame_blocked()) { // Only render one sprite per frame
                 break;
-            } else {
-                cpu.execute_cycle(memory, display, input);
-                if (display.is_frame_blocked()) {
-                    break;
-                }
             }
         }
         
@@ -137,7 +105,6 @@ void Chip8::load_rom(const char* filename) {
     } catch (std::exception& e) {
         std::cerr << "Load ROM error: " << e.what() << std::endl;
         throw;
-        // return false;
     }
 }
 

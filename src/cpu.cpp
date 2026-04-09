@@ -336,11 +336,25 @@ void CPU::OP_Fx07(uint16_t opcode) {
 
 void CPU::OP_Fx0A(uint16_t opcode, Input& keys) {
     uint8_t Vx = (opcode & 0x0F00) >> 8;
-    keys.reset();
-    waiting_for_key = true;
-    key_register = Vx;
-    PC -= 2; // Stay on this instruction until a key is pressed
-    // If no key is pressed, do not advance the PC
+    
+    // Check if ANY key is currently pressed
+    int pressed_key = -1;
+    for (int i = 0; i < 16; i++) {
+        if (keys.is_pressed(i)) {
+            pressed_key = i;
+            break;
+        }
+    }
+    
+    if (pressed_key != -1) {
+        V[Vx] = pressed_key;
+        waiting_for_key = false;
+        // Proceed to next instruction
+    } else {
+        // No key pressed, stay on instruction
+        waiting_for_key = true;
+        PC -= 2;
+    }
 }
 
 void CPU::OP_Fx15(uint16_t opcode) {
@@ -417,12 +431,4 @@ void CPU::set_V(uint8_t index, uint8_t value) {
 
 bool CPU::is_waiting_for_key() const { 
     return waiting_for_key;
-}
-
-void CPU::handle_key_press(uint8_t key) {
-    if (waiting_for_key) {
-        V[key_register] = key;
-        waiting_for_key = false;
-        PC += 2;  // Advance to next instruction
-    }
 }

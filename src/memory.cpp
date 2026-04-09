@@ -33,7 +33,6 @@ uint8_t Memory::read(uint16_t address) const {
         throw std::out_of_range("Memory read out of bounds");
     }
     return memory[address];
-    // return memory[address & 0xFFF];
 }
 
 void Memory::write(uint16_t address, uint8_t value) {
@@ -41,7 +40,6 @@ void Memory::write(uint16_t address, uint8_t value) {
         throw std::out_of_range("Memory write out of bounds");
     }
     memory[address] = value;
-    // memory[address & 0xFFF] = value;
 }
 void Memory::load_rom(const std::string& filename, uint16_t start_address) {
     // std::cout << "Opening: " << filename << std::endl;
@@ -99,6 +97,5 @@ void Memory::load_fontset() {
     // Start loading fontset at memory location 0x50 (80 bytes)
     for (unsigned int i = 0; i < FONTSET_SIZE; ++i) {
         memory[0x50 + i] = fontset[i];
-        // memory[i] = fontset[i];
     }
 }

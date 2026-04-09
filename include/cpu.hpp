@@ -1,9 +1,9 @@
 #pragma once
 #include <cstdint>
-#include "../include/memory.hpp"
-#include "../include/display.hpp"
-#include "../include/input.hpp"
-#include "../include/debugger.hpp"
+#include "memory.hpp"
+#include "display.hpp"
+#include "input.hpp"
+#include "debugger.hpp"
 
 class CPU {
     private:
@@ -81,5 +81,4 @@ class CPU {
         void push_stack(uint16_t address);
         uint16_t pop_stack();
         bool is_waiting_for_key() const;
-        void handle_key_press(uint8_t key);
 };

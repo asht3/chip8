@@ -36,6 +36,7 @@ bool Display::draw_sprite(uint8_t x, uint8_t y, uint8_t* sprite, uint8_t height)
         }
         
         for (int col = 0; col < 8; col++) {
+            // Check if the current pixel (from left to right) should be drawn
             if ((sprite_row & (0x80 >> col)) != 0) {
                 int pixel_x = start_x + col;
                 
@@ -79,8 +80,6 @@ bool Display::xor_pixel(uint8_t x, uint8_t y) {
     }
     int index = x + y * WIDTH;
     bool old_value = pixels[index];
-    // pixels[index] = pixels[index] ^ true;  // XOR with 1
-    // return old_value && !pixels[index];    // Collision if was on and now off
     bool new_value = !old_value;
     pixels[index] = new_value;
     return (old_value == true && new_value == false);
